@@ -347,7 +347,16 @@ class CanonBuilder:
 
         for entity_id, entity in self._entities.items():
             if entity_id not in existing_ids:
+                # Ensure evidence_ids are sorted for determinism
+                if "evidence_ids" in entity:
+                    entity["evidence_ids"] = sorted(set(entity.get("evidence_ids", [])))
                 storygraph["entities"].append(entity)
+
+        # Sort entities for deterministic output
+        storygraph["entities"] = sorted(
+            storygraph["entities"],
+            key=lambda e: (e.get("type", ""), e.get("id", ""))
+        )
 
         # Write back
         storygraph_path = self.build_path / "storygraph.json"
@@ -392,6 +401,12 @@ class CanonBuilder:
         # Add new items
         existing["items"].extend(self._queue_items)
         existing["updated_at"] = datetime.now().isoformat()
+
+        # Sort items for deterministic output
+        existing["items"] = sorted(
+            existing["items"],
+            key=lambda i: i.get("id", "")
+        )
 
         queue_path.write_text(json.dumps(existing, indent=2))
 
