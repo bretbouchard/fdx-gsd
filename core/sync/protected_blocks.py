@@ -223,6 +223,38 @@ def get_protected_content(
     return blocks[block_index].content
 
 
+def split_at_protected_block(
+    text: str,
+    begin_marker: str = BEGIN_MARKER,
+    end_marker: str = END_MARKER,
+) -> Tuple[str, str, str]:
+    """
+    Split text into (before, protected_content, after) parts.
+
+    Convenience function for working with a single protected block.
+
+    Args:
+        text: Document text
+        begin_marker: Start marker pattern
+        end_marker: End marker pattern
+
+    Returns:
+        Tuple of (before_markers, content_between_markers, after_markers)
+        If no markers found, returns (text, "", "")
+    """
+    blocks = extract_protected_content(text, begin_marker, end_marker)
+
+    if not blocks:
+        return text, "", ""
+
+    block = blocks[0]
+    before = text[:block.start_pos]
+    protected = block.content
+    after = text[block.end_pos:]
+
+    return before, protected, after
+
+
 def append_to_protected_content(
     text: str,
     content_to_append: str,
@@ -289,3 +321,34 @@ def strip_protected_markers(text: str) -> str:
     result = re.sub(r"\s*" + re.escape(END_MARKER), "", result)
 
     return result
+
+
+def ensure_markers(text: str, insert_at_end: bool = False) -> str:
+    """
+    Ensure text has protected block markers.
+
+    If markers are missing, adds them. If markers exist, returns unchanged.
+
+    Args:
+        text: Text to check/modify
+        insert_at_end: If True, append markers at end; otherwise insert before ## Notes
+
+    Returns:
+        Text with protected block markers
+    """
+    # Check if markers already exist
+    if has_protected_block(text):
+        return text
+
+    # Look for ## Notes section to insert before it
+    notes_pattern = r"(\n##\s+Notes)"
+    match = re.search(notes_pattern, text)
+
+    if match and not insert_at_end:
+        # Insert before ## Notes section
+        insert_pos = match.start()
+        protected_block = f"\n{BEGIN_MARKER}\n{END_MARKER}\n"
+        return text[:insert_pos] + protected_block + text[insert_pos:]
+    else:
+        # Append at end
+        return f"{text.rstrip()}\n\n{BEGIN_MARKER}\n{END_MARKER}\n"

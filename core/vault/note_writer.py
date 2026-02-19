@@ -1,6 +1,7 @@
 """Vault note writer - Generates Obsidian-compatible markdown notes.
 
 Writes entity notes to vault directories with evidence links.
+Uses protected block replacement to preserve manual edits.
 """
 import json
 from pathlib import Path
@@ -12,10 +13,20 @@ from .templates import (
     render_scene_template,
     _slugify,
 )
+from ..sync.protected_blocks import (
+    replace_protected_content,
+    has_protected_block,
+    ensure_markers,
+    get_protected_content,
+)
 
 
 class VaultNoteWriter:
-    """Writes entity notes to the Obsidian vault."""
+    """Writes entity notes to the Obsidian vault.
+
+    Uses protected block replacement to preserve user edits outside
+    <!-- CONFUCIUS:BEGIN AUTO --> ... <!-- CONFUCIUS:END AUTO --> markers.
+    """
 
     def __init__(self, vault_path: Path, build_path: Path = None):
         """
@@ -76,9 +87,65 @@ class VaultNoteWriter:
 
         return "\n".join(f"- {link}" for link in links)
 
+    def _write_with_protection(
+        self,
+        file_path: Path,
+        new_protected_content: str,
+        full_template_content: str = None
+    ) -> Path:
+        """
+        Write file using protected block replacement.
+
+        If file exists, preserves content outside protected blocks.
+        If file doesn't exist, creates from template.
+
+        Args:
+            file_path: Target file path
+            new_protected_content: Content for protected region (without markers)
+            full_template_content: Optional full template for new files
+
+        Returns:
+            Path to written file
+        """
+        if file_path.exists():
+            # Read existing content
+            existing = file_path.read_text(encoding="utf-8")
+
+            # Ensure markers exist
+            if not has_protected_block(existing):
+                existing = ensure_markers(existing)
+
+            # Replace only protected content
+            updated = replace_protected_content(existing, new_protected_content)
+            file_path.write_text(updated, encoding="utf-8")
+        else:
+            # New file - use template
+            if full_template_content:
+                file_path.write_text(full_template_content, encoding="utf-8")
+            else:
+                # Fallback: create with markers
+                content = f"\n{new_protected_content}\n"
+                file_path.write_text(ensure_markers(content), encoding="utf-8")
+
+        return file_path
+
+    def _extract_protected_from_template(
+        self,
+        template_content: str
+    ) -> str:
+        """
+        Extract protected block content from full template.
+
+        Returns content between markers (without markers).
+        """
+        protected = get_protected_content(template_content)
+        return protected if protected else ""
+
     def write_character(self, entity: Dict[str, Any]) -> Path:
         """
         Write a character note to the vault.
+
+        Uses protected block replacement to preserve manual edits.
 
         Args:
             entity: Entity dict with id, name, aliases, evidence_ids, etc.
@@ -94,16 +161,20 @@ class VaultNoteWriter:
         evidence_ids = entity.get("evidence_ids", [])
         evidence_links = self.format_evidence_links(evidence_ids)
 
-        # Render template
-        content = render_character_template(entity, evidence_links)
+        # Render full template (for new files)
+        full_template = render_character_template(entity, evidence_links)
 
-        # Write file
-        file_path.write_text(content)
-        return file_path
+        # Extract protected content for replacement
+        protected_content = self._extract_protected_from_template(full_template)
+
+        # Write with protection
+        return self._write_with_protection(file_path, protected_content, full_template)
 
     def write_location(self, entity: Dict[str, Any]) -> Path:
         """
         Write a location note to the vault.
+
+        Uses protected block replacement to preserve manual edits.
 
         Args:
             entity: Entity dict with id, name, attributes, evidence_ids, etc.
@@ -119,16 +190,20 @@ class VaultNoteWriter:
         evidence_ids = entity.get("evidence_ids", [])
         evidence_links = self.format_evidence_links(evidence_ids)
 
-        # Render template
-        content = render_location_template(entity, evidence_links)
+        # Render full template (for new files)
+        full_template = render_location_template(entity, evidence_links)
 
-        # Write file
-        file_path.write_text(content)
-        return file_path
+        # Extract protected content for replacement
+        protected_content = self._extract_protected_from_template(full_template)
+
+        # Write with protection
+        return self._write_with_protection(file_path, protected_content, full_template)
 
     def write_scene(self, entity: Dict[str, Any]) -> Path:
         """
         Write a scene note to the vault.
+
+        Uses protected block replacement to preserve manual edits.
 
         Args:
             entity: Entity dict with id, name, attributes, evidence_ids, etc.
@@ -143,12 +218,14 @@ class VaultNoteWriter:
         evidence_ids = entity.get("evidence_ids", [])
         evidence_links = self.format_evidence_links(evidence_ids)
 
-        # Render template
-        content = render_scene_template(entity, evidence_links)
+        # Render full template (for new files)
+        full_template = render_scene_template(entity, evidence_links)
 
-        # Write file
-        file_path.write_text(content)
-        return file_path
+        # Extract protected content for replacement
+        protected_content = self._extract_protected_from_template(full_template)
+
+        # Write with protection
+        return self._write_with_protection(file_path, protected_content, full_template)
 
     def write_entity(self, entity: Dict[str, Any]) -> Optional[Path]:
         """
