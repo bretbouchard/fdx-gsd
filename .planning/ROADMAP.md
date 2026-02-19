@@ -145,6 +145,8 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 **Goal:** Edit in Obsidian, Confucius adapts
 
 **Duration:** TBD
+**Status:** 📋 Ready to execute
+**Plans:** 5 plans in 5 waves
 **Depends On:** Phase 2
 
 ### Requirements
@@ -152,12 +154,28 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 - UIX-02: Re-ingestion from Vault
 - INF-04: Incremental Processing
 
+### Key Decisions
+- SHA-256 + mtime for change detection (no new dependencies)
+- Three-tier conflict resolution: SAFE (auto-merge) / AMBIGUOUS (flag) / CRITICAL (block)
+- Protected block replacement preserves manual edits
+- Provenance tracking for audit trail
+- VaultNoteWriter updated to use protected block replacement
+
 ### Deliverables
 - [ ] Protected block enforcement
 - [ ] Vault change detection
 - [ ] Re-ingestion pipeline
 - [ ] Conflict flagging
 - [ ] Provenance tracking (every line knows source)
+- [ ] `gsd sync` CLI command
+- [ ] `gsd conflicts` CLI command
+
+### Plans
+- [ ] 03-01-PLAN.md — Change detector + protected blocks + provenance
+- [ ] 03-02-PLAN.md — Conflict resolver (three-tier)
+- [ ] 03-03-PLAN.md — Vault re-ingester
+- [ ] 03-04-PLAN.md — VaultNoteWriter update + unit tests
+- [ ] 03-05-PLAN.md — CLI integration + round-trip tests
 
 ### Exit Criteria
 - [ ] Manual edits preserved after rebuild
@@ -386,6 +404,6 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 
 ## Current Position
 
-**Phase:** 3 (Round-Trip Editing) - Ready for planning
+**Phase:** 3 (Round-Trip Editing) - Ready for execution
 **Completed:** Phase 0, Phase 1, Phase 2, Phase 7
-**Next Action:** Plan Phase 3 with `/gsd:plan-phase 3`
+**Next Action:** Execute Phase 3 with `/gsd:execute-phase 3`
