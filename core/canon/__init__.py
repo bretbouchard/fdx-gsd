@@ -253,7 +253,9 @@ class CanonBuilder:
                 "recommended_action": "merge" if match.score >= 70 else "link",
                 "recommended_target": match.canonical_id,
                 "evidence_ids": [candidate.block_ref],
-                "created_at": datetime.now().isoformat()
+                "created_at": datetime.now().isoformat(),
+                "source_file": candidate.source_file,
+                "source_line": candidate.line_number,
             })
             return None
 
@@ -271,7 +273,9 @@ class CanonBuilder:
                 "candidates": [],
                 "recommended_action": "create",
                 "evidence_ids": [candidate.block_ref],
-                "created_at": datetime.now().isoformat()
+                "created_at": datetime.now().isoformat(),
+                "source_file": candidate.source_file,
+                "source_line": candidate.line_number,
             })
             return None
 
