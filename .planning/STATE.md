@@ -83,6 +83,8 @@ Phase 2 Plan 3 complete. Phase 2 Script Composition COMPLETE.
 4. Scene ordering from line_number in StoryGraph entities
 5. CLI checks for storygraph.json before building
 6. XML declaration quote style is flexible (ElementTree uses single quotes)
+7. Character lookup uses normalized name index (exact, case-insensitive, alias matching)
+8. Character paragraph meta includes: character_id, match_confidence, match_type
 
 ### Patterns to Remember
 - Every derived fact needs evidence link
