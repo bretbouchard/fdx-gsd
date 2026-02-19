@@ -1,16 +1,16 @@
 # STATE: FDX GSD
 
 **Last Updated:** 2026-02-19
-**Session:** Phase 3 in Progress
+**Session:** Phase 3 COMPLETE
 
 ---
 
 ## Current Position
 
 **Phase:** 3 of 8 (round-trip-editing)
-**Plan:** 4 of 5 (03-04 complete)
-**Status:** In progress
-**Mood:** 🟡 4/5 plans complete
+**Plan:** 5 of 5 (03-05 complete)
+**Status:** Phase complete
+**Mood:** 🟢 Phase 3 COMPLETE
 
 **Progress:** ███████░░░ 62% (Phase 0, 1, 2, 3, 7 complete)
 
@@ -20,6 +20,8 @@
 
 | When | What |
 |------|------|
+| 2026-02-19 | **Phase 3 COMPLETE** - All 5 plans executed, round-trip editing implemented |
+| 2026-02-19 | **Phase 3 Plan 05** - CLI sync/conflicts commands + 12 round-trip integration tests |
 | 2026-02-19 | **Phase 3 Plan 04** - VaultNoteWriter protected block replacement + 46 unit tests for sync module |
 | 2026-02-19 | **Phase 3 Plan 03** - Vault reingestion pipeline (VaultReingester, ReingestResult, ParsedNote) |
 | 2026-02-19 | **Phase 3 Plan 02** - Three-tier conflict resolution (ConflictResolver, Conflict, ConflictTier, ConflictStatus) |
@@ -37,12 +39,13 @@
 ## Active Work
 
 ### Current Task
-Phase 3 Plan 04 complete. Plan 05 remains.
+Phase 3 COMPLETE. Ready for Phase 4.
 
 ### Completed Phases
 - ✅ Phase 0: Foundation
 - ✅ Phase 1: Canon Extraction
 - ✅ Phase 2: Script Composition
+- ✅ Phase 3: Round-Trip Editing
 - ✅ Phase 7: Media Asset Archive (parallel track)
 
 ### Phase 3 Progress
@@ -50,7 +53,7 @@ Phase 3 Plan 04 complete. Plan 05 remains.
 - ✅ Plan 02: Conflict resolution (ConflictResolver, three-tier classification)
 - ✅ Plan 03: Vault reingestion pipeline (VaultReingester, ReingestResult)
 - ✅ Plan 04: VaultNoteWriter protected block replacement + 46 unit tests
-- ⏳ Plan 05: (remaining)
+- ✅ Plan 05: CLI sync/conflicts commands + 12 round-trip integration tests
 
 ---
 
@@ -99,6 +102,8 @@ Phase 3 Plan 04 complete. Plan 05 remains.
 10. Entity index provides O(1) lookups during merge operations
 11. VaultNoteWriter uses protected block replacement to preserve manual edits on rebuild
 12. ensure_markers() inserts protected blocks before ## Notes section for clean placement
+13. CLI sync/conflicts commands use argparse subcommands (existing pattern)
+14. Integration tests verify conflict detection not just entity updates (conflicts may be AMBIGUOUS tier)
 
 ### Patterns to Remember
 - Every derived fact needs evidence link
@@ -118,6 +123,7 @@ Phase 3 Plan 04 complete. Plan 05 remains.
 - **Conflict pattern: Detect conflict -> classify tier -> auto-merge SAFE / flag AMBIGUOUS / block CRITICAL**
 - **Reingest pattern: detect modified files -> parse vault notes -> merge with StoryGraph -> flag conflicts -> save**
 - **Protected write pattern: Check for existing file -> ensure markers -> replace only protected content -> preserve manual edits**
+- **Round-trip CLI pattern: gsd sync -> detect changes -> flag conflicts -> gsd conflicts -> review/resolve**
 
 ### Things to Avoid
 - Don't use bare names when canonical entities exist
@@ -151,8 +157,8 @@ Phase 3 Plan 04 complete. Plan 05 remains.
 
 ## Next Actions
 
-1. **Phase 3 Plan 04 COMPLETE** - VaultNoteWriter protected block replacement
-2. **Next:** Phase 3 Plan 05 (final plan in this phase)
+1. **Phase 3 COMPLETE** - Round-trip editing fully implemented
+2. **Next:** Phase 4 (FDX Export Enhancements) or Phase 5 (PDF Generation)
 
 ---
 
@@ -168,11 +174,11 @@ fdx_gsd/
 │   └── phases/
 │       ├── 01-canon-extraction/ ✅ (4 plans complete)
 │       ├── 02-script-composition/ ✅ (3 plans complete)
-│       ├── 03-round-trip-editing/ ✅ (4/5 plans complete)
+│       ├── 03-round-trip-editing/ ✅ (5/5 plans complete)
 │       └── 07-media-archive/    ✅ (7 plans complete)
 ├── .beads/                      ✅
 ├── .github/workflows/ci.yml     ✅
-├── apps/cli/                    ✅ (build script + export fdx commands)
+├── apps/cli/                    ✅ (build script + export fdx + sync + conflicts commands)
 ├── core/
 │   ├── exporters/               ✅ (FDX writer)
 │   ├── extraction/              ✅ (character, location, scene)
