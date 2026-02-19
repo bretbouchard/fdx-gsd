@@ -1,13 +1,19 @@
 """Sync module - Round-trip editing support.
 
-Provides change detection, protected block parsing, and provenance
-tracking for vault synchronization.
+Provides change detection, protected block parsing, provenance
+tracking, and conflict resolution for vault synchronization.
 """
 from .change_detector import (
     ChangeDetector,
     ChangeRecord,
     FileState,
     calculate_file_hash,
+)
+from .conflict_resolver import (
+    Conflict,
+    ConflictResolver,
+    ConflictStatus,
+    ConflictTier,
 )
 from .protected_blocks import (
     BEGIN_MARKER,
@@ -35,6 +41,11 @@ __all__ = [
     "ChangeRecord",
     "FileState",
     "calculate_file_hash",
+    # Conflict resolution
+    "Conflict",
+    "ConflictResolver",
+    "ConflictStatus",
+    "ConflictTier",
     # Protected blocks
     "BEGIN_MARKER",
     "END_MARKER",
