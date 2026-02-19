@@ -512,16 +512,40 @@ def _apply_resolution(project_path: Path, item: dict):
                     entity.setdefault("aliases", []).append(mention)
                 if item.get("evidence_ids"):
                     entity.setdefault("evidence_ids", []).extend(item["evidence_ids"])
+                # Update the vault note with new alias and evidence
+                _update_vault_note(project_path, entity)
                 break
 
     elif item["recommended_action"] == "create":
-        _create_entity_from_queue(project_path, item)
+        entity = _create_entity_from_queue(project_path, item)
+        if entity:
+            _update_vault_note(project_path, entity)
 
     storygraph_path.write_text(json.dumps(storygraph, indent=2))
 
 
-def _create_entity_from_queue(project_path: Path, item: dict):
-    """Create a new entity from a queue item."""
+def _update_vault_note(project_path: Path, entity: dict):
+    """Update or create a vault note for an entity after resolution."""
+    from core.vault import VaultNoteWriter
+
+    vault_path = project_path / "vault"
+    build_path = project_path / "build"
+
+    writer = VaultNoteWriter(vault_path, build_path)
+
+    try:
+        writer.write_entity(entity)
+    except Exception:
+        # Don't fail resolution if vault writing fails
+        pass
+
+
+def _create_entity_from_queue(project_path: Path, item: dict) -> dict:
+    """Create a new entity from a queue item.
+
+    Returns:
+        The created entity dict, or None if entity already exists.
+    """
     storygraph_path = project_path / "build" / "storygraph.json"
     storygraph = json.loads(storygraph_path.read_text())
 
@@ -535,7 +559,7 @@ def _create_entity_from_queue(project_path: Path, item: dict):
     # Check if exists
     existing_ids = {e["id"] for e in storygraph.get("entities", [])}
     if canonical_id in existing_ids:
-        return
+        return None
 
     # Create entity
     entity = {
@@ -545,11 +569,15 @@ def _create_entity_from_queue(project_path: Path, item: dict):
         "aliases": [item.get("mention", "")],
         "attributes": {},
         "evidence_ids": item.get("evidence_ids", []),
-        "confidence": 0.5
+        "confidence": 0.5,
+        "source_file": item.get("source_file"),
+        "source_line": item.get("source_line"),
     }
 
     storygraph["entities"].append(entity)
     storygraph_path.write_text(json.dumps(storygraph, indent=2))
+
+    return entity
 
 
 # ============================================================================
