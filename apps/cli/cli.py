@@ -369,9 +369,38 @@ def cmd_build(args: argparse.Namespace) -> int:
         return 0 if result.success else 1
 
     elif what == "script":
-        print("Building script... (Phase 2 - coming soon)")
-        print("This will compose screenplay from storygraph.")
-        return 0
+        from core.script import build_script
+
+        print("Building script...")
+        print(f"Project: {config['project']['name']}")
+        print()
+
+        # Check for storygraph
+        storygraph_path = project_path / "build" / "storygraph.json"
+        if not storygraph_path.exists():
+            print("No storygraph.json found. Run 'gsd build canon' first.")
+            return 1
+
+        # Run script builder
+        result = build_script(project_path, config)
+
+        # Report results
+        print()
+        print("=== Script Build Results ===")
+        print(f"Scenes: {result.scenes_built}")
+        print(f"Paragraphs: {result.paragraphs_created}")
+
+        if result.errors:
+            print()
+            print("Errors:")
+            for error in result.errors:
+                print(f"  - {error}")
+
+        print()
+        print(f"ScriptGraph: build/scriptgraph.json")
+        print(f"Next: gsd export fdx")
+
+        return 0 if result.success else 1
 
     else:
         print(f"Unknown build target: {what}")
