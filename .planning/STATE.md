@@ -8,11 +8,11 @@
 ## Current Position
 
 **Phase:** 1 of 10 (canon-extraction)
-**Plan:** 02 of 4 complete
-**Status:** In progress - vault integration complete
+**Plan:** 03 of 4 complete
+**Status:** In progress - CLI polish + deterministic builds complete
 **Mood:** 🟢 Ready to continue
 
-**Progress:** ██░░░░░░░░ 20%
+**Progress:** ███░░░░░░░ 30%
 
 ---
 
@@ -20,6 +20,7 @@
 
 | When | What |
 |------|------|
+| 2026-02-19 | **Phase 1 Plan 03: CLI Polish + Deterministic Builds** - Vault output in CLI, sorted JSON |
 | 2026-02-19 | **Phase 1 Plan 02: Vault Integration** - CanonBuilder with vault writing |
 | 2026-02-19 | **Phase 1 Plan 01: Note Templates** - VaultNoteWriter created |
 | 2026-02-19 | Project structure created |
@@ -43,11 +44,11 @@
 ## Active Work
 
 ### Current Task
-Phase 1 Plan 02 complete - vault integration finished.
+Phase 1 Plan 03 complete - CLI polish + deterministic builds finished.
 
 ### Ready Work (from Beads)
 1. `fdx_gsd-2`: PHASE-1: Canon Extraction (in progress)
-2. Continue with Plan 03 or next phase
+2. Continue with Plan 04 or next phase
 
 ---
 
@@ -83,6 +84,7 @@ Phase 1 Plan 02 complete - vault integration finished.
 - **All aliases link to ONE canonical UUID**
 - **Vault notes are written during canon build with evidence links**
 - **Evidence links resolve to full Obsidian wikilinks via evidence_index.json**
+- **Sort JSON output (entities by type/id, queue items by id, evidence_ids) for deterministic builds**
 
 ### Things to Avoid
 - Don't use bare names when canonical entities exist
@@ -146,8 +148,8 @@ Phase 1 Plan 02 complete - vault integration finished.
 
 ## Next Actions
 
-1. **Continue Phase 1** - Execute Plan 03 if exists, or proceed to next phase
-2. **Verify vault notes** - Run integration tests to confirm notes are created correctly
+1. **Continue Phase 1** - Execute Plan 04 if exists, or proceed to next phase
+2. **CLI tested** - All 94 tests pass including e2e integration tests
 3. **Update beads** - Mark completed work
 
 ---
