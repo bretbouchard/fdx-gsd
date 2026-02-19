@@ -7,6 +7,7 @@ Wires together:
 - Evidence linking
 - Vault note generation
 """
+import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -21,6 +22,11 @@ from ..extraction import (
     ExtractionCandidate,
 )
 from ..resolution import FuzzyMatcher, create_matcher
+from ..vault import VaultNoteWriter
+
+# Constants
+FUZZY_QUEUE_THRESHOLD = 50  # Minimum score to consider fuzzy match for queueing
+FUZZY_MERGE_THRESHOLD = 70  # Score at which we suggest merge vs link
 
 
 @dataclass
@@ -33,6 +39,7 @@ class CanonBuildResult:
     locations_linked: int = 0
     scenes_created: int = 0
     queue_items: int = 0
+    vault_notes_written: int = 0
     errors: List[str] = field(default_factory=list)
 
 
@@ -69,6 +76,9 @@ class CanonBuilder:
         # Config
         self.auto_accept_threshold = disambig_config.get("auto_accept", 0.95)
         self.always_ask_new = disambig_config.get("always_ask_new", True)
+
+        # Vault writer
+        self.vault_writer = VaultNoteWriter(self.vault_path, self.build_path)
 
         # State
         self._entities: Dict[str, Dict] = {}  # canonical_id -> entity data
@@ -116,6 +126,9 @@ class CanonBuilder:
         # Update storygraph
         self._update_storygraph(storygraph)
 
+        # Write vault notes
+        result.vault_notes_written = self._write_vault_notes()
+
         # Update disambiguation queue
         result.queue_items = len(self._queue_items)
         self._update_disambiguation_queue()
@@ -158,9 +171,8 @@ class CanonBuilder:
             "scenes_created": 0,
         }
 
-        # Extract characters
-        char_extractor = CharacterExtractor()
-        characters = char_extractor.extract_from_file(inbox_file)
+        # Extract characters using instance extractor
+        characters = self.char_extractor.extract_from_file(inbox_file)
 
         for candidate in characters:
             canonical_id = self._resolve_or_create_entity(
@@ -172,9 +184,8 @@ class CanonBuilder:
                 else:
                     result["chars_created"] += 1
 
-        # Extract locations
-        loc_extractor = LocationExtractor()
-        locations = loc_extractor.extract_from_file(inbox_file)
+        # Extract locations using instance extractor
+        locations = self.loc_extractor.extract_from_file(inbox_file)
 
         for candidate in locations:
             canonical_id = self._resolve_or_create_entity(
@@ -190,11 +201,9 @@ class CanonBuilder:
 
     def _process_scene_boundaries(self, inbox_files: List[Path]):
         """Process scene boundaries from all files."""
-        scene_extractor = SceneExtractor()
-
         for inbox_file in inbox_files:
             content = inbox_file.read_text(encoding="utf-8")
-            boundaries = scene_extractor.detect_boundaries(content, str(inbox_file))
+            boundaries = self.scene_extractor.detect_boundaries(content, str(inbox_file))
 
             for boundary in boundaries:
                 if boundary.scene_type == "slugline":
@@ -343,6 +352,34 @@ class CanonBuilder:
         # Write back
         storygraph_path = self.build_path / "storygraph.json"
         storygraph_path.write_text(json.dumps(storygraph, indent=2))
+
+    def _write_vault_notes(self) -> int:
+        """
+        Write vault notes for all entities.
+
+        Returns:
+            Number of notes written
+        """
+        notes_written = 0
+
+        for entity_id, entity in self._entities.items():
+            entity_type = entity.get("type", "")
+
+            try:
+                if entity_type == "character":
+                    self.vault_writer.write_character(entity)
+                    notes_written += 1
+                elif entity_type == "location":
+                    self.vault_writer.write_location(entity)
+                    notes_written += 1
+                elif entity_type == "scene":
+                    self.vault_writer.write_scene(entity)
+                    notes_written += 1
+            except Exception:
+                # Don't fail the build if vault writing fails
+                pass
+
+        return notes_written
 
     def _update_disambiguation_queue(self):
         """Update disambiguation queue file."""
