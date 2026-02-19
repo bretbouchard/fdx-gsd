@@ -1,164 +1,188 @@
-"""Vault note writer for generating Obsidian-compatible markdown files.
+"""Vault note writer - Generates Obsidian-compatible markdown notes.
 
-This module provides the VaultNoteWriter class for writing entity notes
-to the vault directory structure with proper formatting and evidence links.
+Writes entity notes to vault directories with evidence links.
 """
-
-import re
+import json
 from pathlib import Path
-from typing import Any
+from typing import Dict, List, Optional, Any
 
-from .templates import CHARACTER_TEMPLATE, LOCATION_TEMPLATE, SCENE_TEMPLATE
+from .templates import (
+    render_character_template,
+    render_location_template,
+    render_scene_template,
+    _slugify,
+)
 
 
 class VaultNoteWriter:
-    """Writes entity notes to vault directory structure.
+    """Writes entity notes to the Obsidian vault."""
 
-    Manages creation of markdown files for characters, locations, and scenes
-    in the appropriate vault subdirectories with proper formatting.
-
-    Attributes:
-        vault_path: Root path to the vault directory
-        characters_dir: Path to characters subdirectory
-        locations_dir: Path to locations subdirectory
-        scenes_dir: Path to scenes subdirectory
-    """
-
-    def __init__(self, vault_path: Path):
-        """Initialize vault note writer.
+    def __init__(self, vault_path: Path, build_path: Path = None):
+        """
+        Initialize the vault note writer.
 
         Args:
-            vault_path: Root path to the vault directory
+            vault_path: Path to the vault root
+            build_path: Path to build directory (for evidence index)
         """
         self.vault_path = Path(vault_path)
-        self.characters_dir = self.vault_path / "10_Characters"
-        self.locations_dir = self.vault_path / "20_Locations"
-        self.scenes_dir = self.vault_path / "50_Scenes"
+        self.build_path = Path(build_path) if build_path else self.vault_path.parent / "build"
+        self._evidence_index = None
 
-        # Create directories if they don't exist
-        self.characters_dir.mkdir(parents=True, exist_ok=True)
-        self.locations_dir.mkdir(parents=True, exist_ok=True)
-        self.scenes_dir.mkdir(parents=True, exist_ok=True)
+        # Ensure directories exist
+        self._ensure_directories()
 
-    def _slugify(self, name: str) -> str:
-        """Convert name to URL-safe slug.
+    def _ensure_directories(self):
+        """Create vault subdirectories if they don't exist."""
+        dirs = [
+            self.vault_path / "10_Characters",
+            self.vault_path / "20_Locations",
+            self.vault_path / "50_Scenes",
+        ]
+        for d in dirs:
+            d.mkdir(parents=True, exist_ok=True)
 
-        Args:
-            name: Original name (e.g., "John Smith")
+    def _load_evidence_index(self) -> dict:
+        """Load the evidence index for link resolution."""
+        if self._evidence_index is None:
+            path = self.build_path / "evidence_index.json"
+            if path.exists():
+                self._evidence_index = json.loads(path.read_text())
+            else:
+                self._evidence_index = {"evidence": {}}
+        return self._evidence_index
 
-        Returns:
-            Slugified name (e.g., "john-smith")
+    def format_evidence_links(self, evidence_ids: List[str]) -> str:
         """
-        # Convert to lowercase
-        slug = name.lower()
-        # Replace non-alphanumeric characters with hyphens
-        slug = re.sub(r'[^a-z0-9]+', '-', slug)
-        # Remove leading/trailing hyphens
-        slug = slug.strip('-')
-        # Collapse multiple hyphens
-        slug = re.sub(r'-+', '-', slug)
-        return slug
-
-    def format_evidence_links(self, evidence_ids: list[str]) -> str:
-        """Convert evidence IDs to Obsidian wikilink format.
+        Convert evidence IDs to Obsidian wikilinks.
 
         Args:
-            evidence_ids: List of evidence IDs (e.g., ["ev_001", "ev_002"])
+            evidence_ids: List of block refs (e.g., ["ev_a1b2", "ev_c3d4"])
 
         Returns:
-            Newline-separated string of wikilinks
+            Formatted markdown list of wikilinks
         """
         if not evidence_ids:
-            return "  - none"
+            return ""
 
+        index = self._load_evidence_index()
         links = []
-        for eid in evidence_ids:
-            # Extract source file from evidence ID (e.g., "ev_001" -> "ev")
-            source_file = eid.split('_')[0]
-            link = f"[[inbox/{source_file}.md#^{eid}]]"
-            links.append(f"  - {link}")
 
-        return '\n'.join(links)
+        for ev_id in evidence_ids:
+            ev_data = index.get("evidence", {}).get(ev_id, {})
+            source = ev_data.get("source_path", "unknown")
+            link = f"[[{source}#^{ev_id}]]"
+            links.append(link)
 
-    def write_character(self, entity: dict[str, Any]) -> Path:
-        """Write character note to vault.
+        return "\n".join(f"- {link}" for link in links)
+
+    def write_character(self, entity: Dict[str, Any]) -> Path:
+        """
+        Write a character note to the vault.
 
         Args:
-            entity: Character entity dict with required keys:
-                - id: Unique identifier
-                - name: Character name
-                - type: Entity type (usually "character")
-                - aliases: List of alternative names
-                - first_appearance: Scene or description (optional)
-                - evidence_ids: List of evidence IDs
+            entity: Entity dict with id, name, aliases, evidence_ids, etc.
 
         Returns:
-            Path to the created markdown file
+            Path to the written file
         """
-        # Generate filename from character name
-        slug = self._slugify(entity['name'])
-        filename = f"{slug}.md"
-        filepath = self.characters_dir / filename
+        name = entity.get("name", "unknown")
+        slug = _slugify(name)
+        file_path = self.vault_path / "10_Characters" / f"{slug}.md"
 
-        # Generate markdown content
-        content = CHARACTER_TEMPLATE(entity)
+        # Format evidence links
+        evidence_ids = entity.get("evidence_ids", [])
+        evidence_links = self.format_evidence_links(evidence_ids)
+
+        # Render template
+        content = render_character_template(entity, evidence_links)
 
         # Write file
-        filepath.write_text(content, encoding='utf-8')
+        file_path.write_text(content)
+        return file_path
 
-        return filepath
-
-    def write_location(self, entity: dict[str, Any]) -> Path:
-        """Write location note to vault.
+    def write_location(self, entity: Dict[str, Any]) -> Path:
+        """
+        Write a location note to the vault.
 
         Args:
-            entity: Location entity dict with required keys:
-                - id: Unique identifier
-                - name: Location name
-                - type: Entity type (usually "location")
-                - int_ext: INT or EXT indicator
-                - time_of_day: Time of day (optional)
-                - evidence_ids: List of evidence IDs
+            entity: Entity dict with id, name, attributes, evidence_ids, etc.
 
         Returns:
-            Path to the created markdown file
+            Path to the written file
         """
-        # Generate filename from location name
-        slug = self._slugify(entity['name'])
-        filename = f"{slug}.md"
-        filepath = self.locations_dir / filename
+        name = entity.get("name", "unknown")
+        slug = _slugify(name)
+        file_path = self.vault_path / "20_Locations" / f"{slug}.md"
 
-        # Generate markdown content
-        content = LOCATION_TEMPLATE(entity)
+        # Format evidence links
+        evidence_ids = entity.get("evidence_ids", [])
+        evidence_links = self.format_evidence_links(evidence_ids)
+
+        # Render template
+        content = render_location_template(entity, evidence_links)
 
         # Write file
-        filepath.write_text(content, encoding='utf-8')
+        file_path.write_text(content)
+        return file_path
 
-        return filepath
-
-    def write_scene(self, entity: dict[str, Any]) -> Path:
-        """Write scene note to vault.
+    def write_scene(self, entity: Dict[str, Any]) -> Path:
+        """
+        Write a scene note to the vault.
 
         Args:
-            entity: Scene entity dict with required keys:
-                - id: Unique identifier (e.g., "SCN_001")
-                - scene_number: Scene number
-                - location: Location name
-                - int_ext: INT or EXT indicator
-                - time_of_day: Time of day (optional)
-                - evidence_ids: List of evidence IDs
+            entity: Entity dict with id, name, attributes, evidence_ids, etc.
 
         Returns:
-            Path to the created markdown file
+            Path to the written file
         """
-        # Use scene ID as filename (e.g., "SCN_001.md")
-        filename = f"{entity['id']}.md"
-        filepath = self.scenes_dir / filename
+        scene_id = entity.get("id", "SCN_000")
+        file_path = self.vault_path / "50_Scenes" / f"{scene_id}.md"
 
-        # Generate markdown content
-        content = SCENE_TEMPLATE(entity)
+        # Format evidence links
+        evidence_ids = entity.get("evidence_ids", [])
+        evidence_links = self.format_evidence_links(evidence_ids)
+
+        # Render template
+        content = render_scene_template(entity, evidence_links)
 
         # Write file
-        filepath.write_text(content, encoding='utf-8')
+        file_path.write_text(content)
+        return file_path
 
-        return filepath
+    def write_entity(self, entity: Dict[str, Any]) -> Optional[Path]:
+        """
+        Write any entity to the appropriate vault location.
+
+        Args:
+            entity: Entity dict with 'type' field
+
+        Returns:
+            Path to written file, or None if unknown type
+        """
+        entity_type = entity.get("type", "")
+
+        if entity_type == "character":
+            return self.write_character(entity)
+        elif entity_type == "location":
+            return self.write_location(entity)
+        elif entity_type == "scene":
+            return self.write_scene(entity)
+
+        return None
+
+
+def write_entity_note(entity: Dict[str, Any], vault_path: Path, build_path: Path = None) -> Optional[Path]:
+    """
+    Convenience function to write an entity note.
+
+    Args:
+        entity: Entity dict
+        vault_path: Path to vault root
+        build_path: Optional path to build directory
+
+    Returns:
+        Path to written file
+    """
+    writer = VaultNoteWriter(vault_path, build_path)
+    return writer.write_entity(entity)

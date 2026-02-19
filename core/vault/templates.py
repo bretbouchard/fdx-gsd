@@ -1,163 +1,251 @@
-"""Note templates for vault markdown generation.
+"""Note templates for vault entity notes.
 
-This module provides deterministic templates for generating Obsidian-compatible
-markdown notes for characters, locations, and scenes.
+Templates generate Obsidian-compatible markdown with:
+- YAML frontmatter
+- Protected block markers for auto-generated content
+- Evidence links in wikilink format
 """
-
 from datetime import datetime
-from typing import Any
+from string import Template
+from typing import Dict, Any, List
 
 
-def CHARACTER_TEMPLATE(entity: dict[str, Any]) -> str:
-    """Generate character note markdown.
+def _slugify(name: str) -> str:
+    """Convert name to URL-safe slug."""
+    slug = name.lower().strip()
+    slug = slug.replace(" ", "-")
+    # Remove non-alphanumeric except hyphens
+    slug = "".join(c for c in slug if c.isalnum() or c == "-")
+    return slug
 
-    Args:
-        entity: Dict with keys: id, name, type, aliases (list),
-                first_appearance (optional), evidence_ids (list)
 
-    Returns:
-        Formatted markdown string with YAML frontmatter and body.
-    """
-    now = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+def format_yaml_value(value: Any) -> str:
+    """Format a value for YAML frontmatter."""
+    if isinstance(value, str):
+        # Simple string - quote if needed
+        if any(c in value for c in [":", "#", "{", "}", "[", "]", '"', "'"]):
+            return f'"{value}"'
+        return value
+    elif isinstance(value, list):
+        if not value:
+            return "[]"
+        return f"[{', '.join(repr(v) for v in value)}]"
+    elif isinstance(value, bool):
+        return "true" if value else "false"
+    elif value is None:
+        return "null"
+    return str(value)
 
-    # Process aliases
+
+def render_character_template(entity: Dict[str, Any], evidence_links: str) -> str:
+    """Render a character note from entity data."""
+    now = datetime.now().strftime("%Y-%m-%d")
     aliases = entity.get("aliases", [])
-    aliases_str = "\n".join([f"  - {alias}" for alias in aliases]) if aliases else "  - none"
-
-    # Process first appearance
-    first_appearance = entity.get("first_appearance", "Unknown")
-
-    # Process evidence links
-    evidence_ids = entity.get("evidence_ids", [])
-    evidence_links = "\n".join([f"  - [[inbox/{eid.split('_')[0]}.md#^{eid}]]" for eid in evidence_ids]) if evidence_ids else "  - none"
+    aliases_str = ", ".join(repr(a) for a in aliases) if aliases else "[]"
 
     return f"""---
-id: {entity['id']}
-name: {entity['name']}
-type: {entity.get('type', 'character')}
-aliases:
-{aliases_str}
+id: {entity.get('id', 'unknown')}
+name: {entity.get('name', 'Unknown')}
+type: character
+aliases: [{aliases_str}]
 created_at: {now}
 ---
 
-# {entity['name']}
+# {entity.get('name', 'Unknown Character')}
 
 <!-- CONFUCIUS:BEGIN AUTO -->
-
 ## Aliases
 
-{chr(10).join(['- ' + alias for alias in aliases]) if aliases else '- None'}
+{chr(10).join(f'- {a}' for a in aliases) if aliases else '*None recorded*'}
 
 ## First Appearance
 
-{first_appearance}
+*To be documented*
 
 ## Evidence
 
-{evidence_links}
-
+{evidence_links if evidence_links else '*No evidence links yet*'}
 <!-- CONFUCIUS:END AUTO -->
+
+## Notes
+
+*Add your notes here...*
 """
 
 
-def LOCATION_TEMPLATE(entity: dict[str, Any]) -> str:
-    """Generate location note markdown.
-
-    Args:
-        entity: Dict with keys: id, name, type, int_ext (INT/EXT),
-                time_of_day (optional), evidence_ids (list)
-
-    Returns:
-        Formatted markdown string with YAML frontmatter and body.
-    """
-    now = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-
-    # Process INT/EXT
-    int_ext = entity.get("int_ext", "UNKNOWN")
-
-    # Process time of day
-    time_of_day = entity.get("time_of_day")
-    time_str = f"\ntime_of_day: {time_of_day}" if time_of_day else ""
-
-    # Process evidence links
-    evidence_ids = entity.get("evidence_ids", [])
-    evidence_links = "\n".join([f"  - [[inbox/{eid.split('_')[0]}.md#^{eid}]]" for eid in evidence_ids]) if evidence_ids else "  - none"
+def render_location_template(entity: Dict[str, Any], evidence_links: str) -> str:
+    """Render a location note from entity data."""
+    now = datetime.now().strftime("%Y-%m-%d")
+    attrs = entity.get("attributes", {})
+    int_ext = attrs.get("int_ext", "INT")
+    time_of_day = attrs.get("time_of_day", "")
 
     return f"""---
-id: {entity['id']}
-name: {entity['name']}
-type: {entity.get('type', 'location')}
-int_ext: {int_ext}{time_str}
+id: {entity.get('id', 'unknown')}
+name: {entity.get('name', 'Unknown Location')}
+type: location
+int_ext: {int_ext}
+time_of_day: {time_of_day}
 created_at: {now}
 ---
 
-# {entity['name']}
+# {entity.get('name', 'Unknown Location')}
 
 <!-- CONFUCIUS:BEGIN AUTO -->
-
 ## Type
 
-{int_ext}
+**{int_ext}**{f' - {time_of_day}' if time_of_day else ''}
 
 ## Description
 
-<!-- Add manual description here -->
+*To be documented*
 
 ## Evidence
 
-{evidence_links}
-
+{evidence_links if evidence_links else '*No evidence links yet*'}
 <!-- CONFUCIUS:END AUTO -->
+
+## Notes
+
+*Add your notes here...*
 """
 
 
-def SCENE_TEMPLATE(entity: dict[str, Any]) -> str:
-    """Generate scene note markdown.
-
-    Args:
-        entity: Dict with keys: id, scene_number, location, int_ext,
-                time_of_day (optional), evidence_ids (list)
-
-    Returns:
-        Formatted markdown string with YAML frontmatter and body.
-    """
-    now = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-
-    # Process time of day
-    time_of_day = entity.get("time_of_day")
-    time_str = f"\ntime_of_day: {time_of_day}" if time_of_day else ""
-
-    # Process location link
-    location = entity.get("location", "Unknown")
-    location_link = f"[[{location}]]" if location != "Unknown" else location
-
-    # Process evidence links
-    evidence_ids = entity.get("evidence_ids", [])
-    evidence_links = "\n".join([f"  - [[inbox/{eid.split('_')[0]}.md#^{eid}]]" for eid in evidence_ids]) if evidence_ids else "  - none"
+def render_scene_template(entity: Dict[str, Any], evidence_links: str) -> str:
+    """Render a scene note from entity data."""
+    now = datetime.now().strftime("%Y-%m-%d")
+    attrs = entity.get("attributes", {})
+    scene_number = entity.get("id", "SCN_000").replace("SCN_", "")
+    location = attrs.get("location", "Unknown Location")
+    int_ext = attrs.get("int_ext", "INT")
+    time_of_day = attrs.get("time_of_day", "")
+    slugline = entity.get("name", f"Scene {scene_number}")
 
     return f"""---
-id: {entity['id']}
-scene_number: {entity['scene_number']}
+id: {entity.get('id', 'SCN_000')}
+scene_number: {scene_number}
 location: {location}
-int_ext: {entity.get('int_ext', 'UNKNOWN')}{time_str}
+int_ext: {int_ext}
+time_of_day: {time_of_day}
 created_at: {now}
 ---
 
-# {entity.get('int_ext', 'UNKNOWN')}. {location} - {time_of_day if time_of_day else 'UNKNOWN'}
+# {slugline}
 
 <!-- CONFUCIUS:BEGIN AUTO -->
+## Location
 
-## Slugline
+[[{location}]]
 
-Scene {entity['scene_number']}: {location_link}
+## Time
+
+**{int_ext}**{f' - {time_of_day}' if time_of_day else ''}
 
 ## Characters
 
-<!-- Characters will be populated here -->
+*To be populated from analysis*
 
 ## Evidence
 
-{evidence_links}
-
+{evidence_links if evidence_links else '*No evidence links yet*'}
 <!-- CONFUCIUS:END AUTO -->
+
+## Notes
+
+*Add scene notes here...*
+"""
+
+
+# Template constants for import compatibility
+CHARACTER_TEMPLATE = """---
+id: ${id}
+name: ${name}
+type: character
+aliases: ${aliases}
+created_at: ${created_at}
+---
+
+# ${name}
+
+<!-- CONFUCIUS:BEGIN AUTO -->
+## Aliases
+
+${aliases_list}
+
+## First Appearance
+
+*To be documented*
+
+## Evidence
+
+${evidence_links}
+<!-- CONFUCIUS:END AUTO -->
+
+## Notes
+
+*Add your notes here...*
+"""
+
+LOCATION_TEMPLATE = """---
+id: ${id}
+name: ${name}
+type: location
+int_ext: ${int_ext}
+time_of_day: ${time_of_day}
+created_at: ${created_at}
+---
+
+# ${name}
+
+<!-- CONFUCIUS:BEGIN AUTO -->
+## Type
+
+**${int_ext}**${time_of_day_display}
+
+## Description
+
+*To be documented*
+
+## Evidence
+
+${evidence_links}
+<!-- CONFUCIUS:END AUTO -->
+
+## Notes
+
+*Add your notes here...*
+"""
+
+SCENE_TEMPLATE = """---
+id: ${id}
+scene_number: ${scene_number}
+location: ${location}
+int_ext: ${int_ext}
+time_of_day: ${time_of_day}
+created_at: ${created_at}
+---
+
+# ${slugline}
+
+<!-- CONFUCIUS:BEGIN AUTO -->
+## Location
+
+[[${location}]]
+
+## Time
+
+**${int_ext}**${time_of_day_display}
+
+## Characters
+
+*To be populated from analysis*
+
+## Evidence
+
+${evidence_links}
+<!-- CONFUCIUS:END AUTO -->
+
+## Notes
+
+*Add scene notes here...*
 """
