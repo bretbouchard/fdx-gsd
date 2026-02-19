@@ -1,7 +1,8 @@
 """Sync module - Round-trip editing support.
 
 Provides change detection, protected block parsing, provenance
-tracking, and conflict resolution for vault synchronization.
+tracking, conflict resolution, and vault reingestion for
+vault synchronization.
 """
 from .change_detector import (
     ChangeDetector,
@@ -34,6 +35,17 @@ from .provenance import (
     ProvenanceTracker,
     SourceType,
 )
+from .reingest import (
+    EntityUpdate,
+    ParsedNote,
+    ReingestResult,
+    VaultReingester,
+    extract_frontmatter,
+    extract_manual_notes,
+    get_entity_type_from_path,
+    parse_frontmatter_yaml,
+    reingest_vault,
+)
 
 __all__ = [
     # Change detection
@@ -63,4 +75,14 @@ __all__ = [
     "ProvenanceRecord",
     "ProvenanceTracker",
     "SourceType",
+    # Reingestion
+    "EntityUpdate",
+    "ParsedNote",
+    "ReingestResult",
+    "VaultReingester",
+    "extract_frontmatter",
+    "extract_manual_notes",
+    "get_entity_type_from_path",
+    "parse_frontmatter_yaml",
+    "reingest_vault",
 ]
