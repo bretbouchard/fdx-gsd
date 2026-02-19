@@ -8,7 +8,7 @@
 ## Current Position
 
 **Phase:** 2 of 8 (script-composition)
-**Plan:** 1 of 3 (02-01 complete)
+**Plan:** 3 of 3 (02-03 complete)
 **Status:** In progress
 **Mood:** 🟢 Executing Phase 2
 
@@ -20,6 +20,8 @@
 
 | When | What |
 |------|------|
+| 2026-02-19 | **Phase 2 Plan 03** - CLI integration + 17 integration tests for full pipeline |
+| 2026-02-19 | **Phase 2 Plan 02** - Dialogue formatter integration |
 | 2026-02-19 | **Phase 2 Plan 01** - ScriptBuilder core with sluglines, beats, dialogue extraction |
 | 2026-02-19 | **Phase 1 COMPLETE** - All 4 plans executed across 3 waves |
 | 2026-02-19 | **Phase 1 Plan 04** - Disambiguation workflow with vault updates + audit trail |
@@ -30,24 +32,25 @@
 | 2026-02-19 | Project structure created |
 | 2026-02-19 | Phase 0 CLI implemented (new-project, ingest, status) |
 | 2026-02-19 | FDX writer implemented |
-| 2026-02-19 | Test framework: 120 tests passing (94 + 26 new) |
+| 2026-02-19 | Test framework: 137 tests passing (120 + 17 new) |
 
 ---
 
 ## Active Work
 
 ### Current Task
-Phase 2 Plan 1 complete. Ready for Phase 2 Plan 2.
+Phase 2 Plan 3 complete. Phase 2 Script Composition COMPLETE.
 
 ### Completed Phases
 - ✅ Phase 0: Foundation
 - ✅ Phase 1: Canon Extraction
+- ✅ Phase 2: Script Composition
 - ✅ Phase 7: Media Asset Archive (parallel track)
 
 ### Phase 2 Progress
 - ✅ Plan 01: ScriptBuilder core (sluglines, beats, dialogue)
-- ⏳ Plan 02: Pending
-- ⏳ Plan 03: Pending
+- ✅ Plan 02: Dialogue formatter integration
+- ✅ Plan 03: CLI integration + 17 integration tests
 
 ---
 
@@ -78,6 +81,8 @@ Phase 2 Plan 1 complete. Ready for Phase 2 Plan 2.
 2. All paragraphs require evidence_ids for traceability
 3. Slugline format: `{INT_EXT}. {LOCATION} - {TIME}` (uppercase)
 4. Scene ordering from line_number in StoryGraph entities
+5. CLI checks for storygraph.json before building
+6. XML declaration quote style is flexible (ElementTree uses single quotes)
 
 ### Patterns to Remember
 - Every derived fact needs evidence link
@@ -92,6 +97,7 @@ Phase 2 Plan 1 complete. Ready for Phase 2 Plan 2.
 - **Evidence links resolve to full Obsidian wikilinks via evidence_index.json**
 - **Sort JSON output (entities by type/id, queue items by id, evidence_ids) for deterministic builds**
 - **ScriptBuilder pattern: load StoryGraph -> build scenes -> write ScriptGraph**
+- **CLI command pattern: import builder -> check prerequisites -> run -> report results**
 
 ### Things to Avoid
 - Don't use bare names when canonical entities exist
@@ -125,8 +131,8 @@ Phase 2 Plan 1 complete. Ready for Phase 2 Plan 2.
 
 ## Next Actions
 
-1. **Execute Phase 2 Plan 2** - Continue Script Composition
-2. **Execute Phase 2 Plan 3** - Complete Script Composition
+1. **Phase 2 COMPLETE** - All 3 plans executed
+2. **Next Phase:** Phase 3 (Export enhancements) or continue with remaining phases
 
 ---
 
@@ -141,11 +147,11 @@ fdx_gsd/
 │   ├── STATE.md                ✅ (this file)
 │   └── phases/
 │       ├── 01-canon-extraction/ ✅ (4 plans complete)
-│       ├── 02-script-composition/ 🔄 (1 of 3 plans complete)
+│       ├── 02-script-composition/ ✅ (3 plans complete)
 │       └── 07-media-archive/    ✅ (7 plans complete)
 ├── .beads/                      ✅
 ├── .github/workflows/ci.yml     ✅
-├── apps/cli/                    ✅
+├── apps/cli/                    ✅ (build script + export fdx commands)
 ├── core/
 │   ├── exporters/               ✅ (FDX writer)
 │   ├── extraction/              ✅ (character, location, scene)
@@ -154,12 +160,12 @@ fdx_gsd/
 │   ├── vault/                   ✅ (VaultNoteWriter, templates)
 │   ├── archive/                 ✅ (media asset tracking)
 │   ├── storygraph/              ✅ (schema)
-│   ├── scriptgraph/             ✅ (schema)
-│   └── script/                  ✅ (ScriptBuilder, SluglineGenerator, BeatExtractor)
+│   ├── scriptgraph/             ✅ (schema + validation utils)
+│   └── script/                  ✅ (ScriptBuilder, SluglineGenerator, BeatExtractor, DialogueFormatter)
 ├── templates/project_template/  ✅
 ├── tests/
 │   ├── unit/                    ✅ (120 tests)
-│   ├── integration/             ✅
+│   ├── integration/             ✅ (17 new tests for script pipeline)
 │   └── fixtures/                ✅
 ├── docs/adr/                    ✅
 ├── scripts/                     ✅
