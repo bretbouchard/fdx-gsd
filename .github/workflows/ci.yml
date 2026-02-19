@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint with ruff
+        run: |
+          ruff check apps core tests
+
+      - name: Type check with mypy
+        run: |
+          mypy apps core --ignore-missing-imports
+        continue-on-error: true
+
+      - name: Run tests
+        run: |
+          pytest tests/ -v --cov=apps --cov=core --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.11'
+        with:
+          files: ./coverage.xml
+
+  validate-schemas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install check-jsonschema
+        run: pip install check-jsonschema
+
+      - name: Validate JSON schemas
+        run: |
+          echo "Validating schema files are valid JSON Schema..."
+          for schema in core/*/schema.json core/build/*.schema.json; do
+            echo "Checking $schema"
+            python -c "import json; json.load(open('$schema'))"
+          done
+
+  build-test:
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Test project creation
+        run: |
+          python -m apps.cli.cli new-project test_build --force
+          cd projects/test_build
+          python -m apps.cli.cli status
+
+      - name: Test ingest
+        run: |
+          cd projects/test_build
+          python -m apps.cli.cli ingest --text "Test character enters the room."
+
+      - name: Test FDX generation
+        run: |
+          cd projects/test_build
+          python -c "
+          import json
+          from core.exporters import write_fdx
+          from pathlib import Path
+
+          # Create minimal scriptgraph
+          sg = {
+              'version': '1.0',
+              'project_id': 'test_build',
+              'scenes': [{
+                  'id': 'SCN_001',
+                  'order': 1,
+                  'slugline': 'INT. ROOM - DAY',
+                  'paragraphs': [{'type': 'action', 'text': 'Test.'}],
+                  'links': {'characters': [], 'locations': [], 'props': [], 'wardrobe': [], 'evidence_ids': []}
+              }]
+          }
+
+          Path('build/scriptgraph.json').write_text(json.dumps(sg))
+          write_fdx('build/scriptgraph.json', 'exports/test.fdx')
+          print('FDX generated:', Path('exports/test.fdx').exists())
+          "

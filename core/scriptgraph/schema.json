@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fdx-gsd.local/schemas/scriptgraph.json",
+  "title": "ScriptGraph",
+  "description": "Screenplay structure model - scenes, beats, dialogue, shots",
+  "type": "object",
+  "required": ["version", "project_id", "scenes"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scenes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/scene" },
+      "description": "Ordered list of scenes"
+    }
+  },
+  "$defs": {
+    "scene": {
+      "type": "object",
+      "required": ["id", "order", "slugline", "paragraphs", "links"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^SCN_[0-9]+$"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "slugline": {
+          "type": "string",
+          "description": "INT./EXT. LOCATION - TIME"
+        },
+        "int_ext": {
+          "type": "string",
+          "enum": ["INT", "EXT", "INT./EXT", "EXT./INT"]
+        },
+        "time_of_day": {
+          "type": "string",
+          "enum": ["DAY", "NIGHT", "DAWN", "DUSK", "MORNING", "AFTERNOON", "EVENING", "CONTINUOUS", "LATER"]
+        },
+        "paragraphs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/paragraph" }
+        },
+        "links": {
+          "type": "object",
+          "required": ["characters", "locations", "props", "wardrobe", "evidence_ids"],
+          "properties": {
+            "characters": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "locations": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "props": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "wardrobe": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "evidence_ids": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "beats": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "continuity_notes": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "paragraph": {
+      "type": "object",
+      "required": ["type", "text"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "scene_heading",
+            "action",
+            "character",
+            "dialogue",
+            "parenthetical",
+            "transition",
+            "shot"
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "meta": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Additional metadata (wardrobe_tags, lighting_notes, etc.)"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

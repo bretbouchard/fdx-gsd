@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fdx-gsd.local/schemas/storygraph.json",
+  "title": "StoryGraph",
+  "description": "Canonical world model for story - characters, locations, props, timeline, continuity",
+  "type": "object",
+  "required": ["version", "project_id", "entities", "edges", "evidence_index"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Project identifier"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entity" },
+      "description": "All canonical entities in the story"
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" },
+      "description": "Relationships between entities"
+    },
+    "evidence_index": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/evidence" },
+      "description": "Index of all evidence blocks"
+    }
+  },
+  "$defs": {
+    "entity": {
+      "type": "object",
+      "required": ["id", "type", "name", "aliases", "attributes", "evidence_ids"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(CHAR|LOC|SCN|PROP|WARD|SHOT|EVT|FACT)_",
+          "description": "Canonical entity ID"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["character", "location", "prop", "wardrobe", "event", "scene", "fact"],
+          "description": "Entity type"
+        },
+        "name": {
+          "type": "string",
+          "description": "Canonical name"
+        },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Alternative names/references"
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Type-specific attributes"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Evidence blocks supporting this entity"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confidence in extraction"
+        },
+        "inferred": {
+          "type": "boolean",
+          "default": false
+        },
+        "last_seen_in_scene": {
+          "type": "string",
+          "description": "Most recent scene ID where entity appears"
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["from", "to", "type"],
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Source entity ID"
+        },
+        "to": {
+          "type": "string",
+          "description": "Target entity ID"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "appears_in",
+            "occurs_at",
+            "worn_in",
+            "present_in",
+            "owns",
+            "precedes",
+            "knows",
+            "related_to",
+            "learns_fact",
+            "tells_fact",
+            "discovers_fact",
+            "overhears_fact"
+          ],
+          "description": "Edge/relationship type"
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Edge metadata (scene_id, method, etc.)"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["source_path", "block_ref", "text_excerpt"],
+      "properties": {
+        "source_path": {
+          "type": "string",
+          "description": "Path to source file"
+        },
+        "block_ref": {
+          "type": "string",
+          "description": "Block anchor ID"
+        },
+        "text_excerpt": {
+          "type": "string",
+          "description": "Verbatim text from source"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

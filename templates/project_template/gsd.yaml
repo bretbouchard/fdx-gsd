@@ -1,0 +1,74 @@
+# GSD Project Configuration
+# Story Operating System - Drivel to Script Generator
+
+project:
+  id: null  # Set by gsd new-project
+  name: null
+  private: true
+  created_at: null
+
+pipeline:
+  phases_enabled:
+    - ingest
+    - canon
+    - script
+    # Phase 4+:
+    # - validate
+    # - export
+    # - report
+
+# Disambiguation settings (per ADR-0004)
+disambiguation:
+  # Confidence thresholds (0.0 - 1.0)
+  auto_accept: 0.95      # Auto-link if confidence >= this
+  auto_reject: 0.30      # Assume new entity if confidence < this
+  # queue_range is implicit: between auto_reject and auto_accept
+
+  # Behavior
+  always_ask_new: true   # Always ask before creating new entity
+  batch_size: 10         # How many items to show in resolve UI
+  learn_aliases: true    # Remember confirmed aliases
+
+  # Fuzzy matching settings (per ADR-0003)
+  fuzzy_threshold: 70    # rapidfuzz score threshold (0-100)
+
+obsidian:
+  vault_path: vault
+  append_only: true
+  protected_blocks: true
+  # Managed block markers
+  block_markers:
+    begin: "<!-- CONFUCIUS:BEGIN AUTO -->"
+    end: "<!-- CONFUCIUS:END AUTO -->"
+
+# Entity ID prefixes
+id_prefixes:
+  character: "CHAR_"
+  location: "LOC_"
+  scene: "SCN_"
+  prop: "PROP_"
+  wardrobe: "WARD_"
+  shot: "SHOT_"
+  event: "EVT_"
+  fact: "FACT_"
+  evidence: "ev_"
+  issue: "ISS_"
+
+# Phase 4+: Validators
+validators:
+  enabled:
+    - continuity.wardrobe
+    - continuity.props
+    - continuity.lighting
+    - timeline.order
+    - timeline.travel
+    - knowledge.leak
+    - knowledge.relationship
+
+export:
+  screenplay:
+    format: fdx
+    include_evidence: false
+  reports:
+    - continuity_report
+    - logic_issues
