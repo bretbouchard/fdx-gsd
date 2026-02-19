@@ -433,6 +433,154 @@ def cmd_export(args: argparse.Namespace) -> int:
     return 0
 
 
+# ============================================================================
+# PHASE 3: Sync Commands
+# ============================================================================
+
+def cmd_sync(args: argparse.Namespace) -> int:
+    """
+    Re-ingest vault changes into StoryGraph.
+
+    Detects modified vault files and syncs them back to storygraph.json.
+    Conflicts are flagged in build/conflicts.json for review.
+
+    Usage: gsd sync
+    """
+    project_path, exit_code = find_project_root()
+    if exit_code != 0:
+        print("Error: Not in a GSD project.", file=sys.stderr)
+        return exit_code
+
+    from core.sync import VaultReingester, ConflictTier
+
+    vault_path = project_path / "vault"
+    storygraph_path = project_path / "build" / "storygraph.json"
+
+    reingester = VaultReingester(vault_path, storygraph_path)
+    result = reingester.reingest_all()
+
+    # Count conflicts by tier
+    conflicts_critical = len([c for c in result.conflicts if c.tier == ConflictTier.CRITICAL])
+    conflicts_ambiguous = len([c for c in result.conflicts if c.tier == ConflictTier.AMBIGUOUS])
+    conflicts_safe = len([c for c in result.conflicts if c.tier == ConflictTier.SAFE])
+
+    print("\n=== Vault Sync Results ===")
+    print(f"Files checked: {result.files_processed}")
+    print(f"Files changed: {len(result.updated_entities)}")
+    print(f"Entities updated: {result.entities_updated}")
+    print(f"Entities created: 0")  # VaultReingester doesn't create new entities
+
+    if conflicts_critical > 0:
+        print(f"\n\033[91m{conflicts_critical}\033[0m critical conflicts (blocking)")
+    if conflicts_ambiguous > 0:
+        print(f"\033[93m{conflicts_ambiguous}\033[0m ambiguous conflicts (review needed)")
+    if conflicts_safe > 0:
+        print(f"\033[92m{conflicts_safe}\033[0m safe conflicts (auto-merged)")
+
+    if result.errors:
+        print(f"\nErrors:")
+        for error in result.errors:
+            print(f"  - {error}")
+
+    if result.success:
+        print(f"\n\033[92mSync complete\033[0m")
+    else:
+        print(f"\n\033[93mSync completed with issues\033[0m")
+
+    return 0 if result.success else 1
+
+
+def cmd_conflicts(args: argparse.Namespace) -> int:
+    """
+    View and resolve sync conflicts.
+
+    Without options, lists all pending conflicts.
+
+    Usage:
+        gsd conflicts                    # List all conflicts
+        gsd conflicts --resolve ID --value "John Smith"
+        gsd conflicts --clear-resolved
+    """
+    project_path, exit_code = find_project_root()
+    if exit_code != 0:
+        print("Error: Not in a GSD project.", file=sys.stderr)
+        return exit_code
+
+    from core.sync import ConflictResolver, ConflictTier
+
+    build_path = project_path / "build"
+    conflicts_path = build_path / "conflicts.json"
+
+    if not conflicts_path.exists():
+        print("No conflicts file found. Run 'gsd sync' first.")
+        return 0
+
+    resolver = ConflictResolver(conflicts_path)
+
+    if args.resolve:
+        # Resolve a specific conflict
+        if not args.value:
+            print("Error: --value is required when using --resolve", file=sys.stderr)
+            return 1
+
+        # Use "custom" resolution with the provided value
+        conflict = resolver.resolve_conflict(args.resolve, "custom", args.value)
+        if conflict:
+            resolver.save_conflicts()
+            print(f"Resolved conflict {args.resolve}")
+        else:
+            print(f"Conflict {args.resolve} not found", file=sys.stderr)
+            return 1
+        return 0
+
+    if args.clear_resolved:
+        # Clear resolved conflicts by creating a new resolver with only pending
+        resolver.save_conflicts()
+        print("Cleared resolved conflicts from display")
+        return 0
+
+    # List conflicts
+    pending = resolver.get_pending_conflicts()
+
+    if not pending:
+        print("No pending conflicts.")
+        return 0
+
+    print(f"\n=== Pending Conflicts ({len(pending)}) ===\n")
+
+    critical = [c for c in pending if c.tier == ConflictTier.CRITICAL]
+    ambiguous = [c for c in pending if c.tier == ConflictTier.AMBIGUOUS]
+    safe = [c for c in pending if c.tier == ConflictTier.SAFE]
+
+    if critical:
+        print("\033[91m\033[1mCRITICAL (blocking):\033[0m")
+        for c in critical:
+            print(f"  [{c.conflict_id}] {c.entity_id}.{c.field_name}")
+            print(f"      Vault: {c.vault_value}")
+            print(f"      Extracted: {c.extraction_value}")
+            if c.resolution_note:
+                print(f"      {c.resolution_note}")
+            print()
+
+    if ambiguous:
+        print("\033[93m\033[1mAMBIGUOUS (review needed):\033[0m")
+        for c in ambiguous:
+            print(f"  [{c.conflict_id}] {c.entity_id}.{c.field_name}")
+            print(f"      Vault: {c.vault_value}")
+            print(f"      Extracted: {c.extraction_value}")
+            print()
+
+    if safe:
+        print("\033[92m\033[1mSAFE (auto-merge):\033[0m")
+        for c in safe:
+            print(f"  [{c.conflict_id}] {c.entity_id}.{c.field_name}")
+        print()
+
+    print(f"Use 'gsd conflicts --resolve ID --value VALUE' to resolve")
+
+    return 0
+
+
 def cmd_resolve(args: argparse.Namespace) -> int:
     """
     Interactive disambiguation resolution.
@@ -1075,6 +1223,17 @@ def main() -> int:
     # resolve
     p_resolve = subparsers.add_parser("resolve", help="Resolve disambiguations")
     p_resolve.set_defaults(func=cmd_resolve)
+
+    # sync
+    p_sync = subparsers.add_parser("sync", help="Re-ingest vault changes into StoryGraph")
+    p_sync.set_defaults(func=cmd_sync)
+
+    # conflicts
+    p_conflicts = subparsers.add_parser("conflicts", help="View and resolve sync conflicts")
+    p_conflicts.add_argument("--resolve", metavar="ID", help="Resolve conflict by ID")
+    p_conflicts.add_argument("--value", help="Value to use for resolution")
+    p_conflicts.add_argument("--clear-resolved", action="store_true", help="Remove resolved conflicts from display")
+    p_conflicts.set_defaults(func=cmd_conflicts)
 
     # archive
     p_archive = subparsers.add_parser("archive", help="Media archive commands")
