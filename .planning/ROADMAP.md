@@ -11,7 +11,7 @@
 ```
 Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4 ──► Phase 5 ──► Phase 6 ──► Phase 7
 Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender     Archive
-   ✅           ✅          ✅          📋          📋         📋         📋           ✅
+   ✅           ✅          ✅          ✅          📋         📋         📋           ✅
                                      │
                                      └──► Phase 7 (parallel track for media archive)
 ```
@@ -140,16 +140,16 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 
 ---
 
-## Phase 3: Round-Trip Editing 📋 PLANNED
+## Phase 3: Round-Trip Editing ✅ COMPLETE
 
 **Goal:** Edit in Obsidian, Confucius adapts
 
-**Duration:** TBD
-**Status:** 📋 Ready to execute
-**Plans:** 5 plans in 5 waves
+**Duration:** Complete (2026-02-19)
+**Status:** ✅ Complete
+**Plans:** 5 plans in 5 waves (all executed)
 **Depends On:** Phase 2
 
-### Requirements
+### Requirements Delivered
 - UIX-01: Protected Blocks
 - UIX-02: Re-ingestion from Vault
 - INF-04: Incremental Processing
@@ -162,25 +162,26 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 - VaultNoteWriter updated to use protected block replacement
 
 ### Deliverables
-- [ ] Protected block enforcement
-- [ ] Vault change detection
-- [ ] Re-ingestion pipeline
-- [ ] Conflict flagging
-- [ ] Provenance tracking (every line knows source)
-- [ ] `gsd sync` CLI command
-- [ ] `gsd conflicts` CLI command
+- [x] Protected block enforcement
+- [x] Vault change detection (SHA-256 + mtime)
+- [x] Re-ingestion pipeline (VaultReingester)
+- [x] Conflict flagging (three-tier)
+- [x] Provenance tracking (every line knows source)
+- [x] `gsd sync` CLI command
+- [x] `gsd conflicts` CLI command
+- [x] 58 tests (46 unit + 12 integration)
 
 ### Plans
-- [ ] 03-01-PLAN.md — Change detector + protected blocks + provenance
-- [ ] 03-02-PLAN.md — Conflict resolver (three-tier)
-- [ ] 03-03-PLAN.md — Vault re-ingester
-- [ ] 03-04-PLAN.md — VaultNoteWriter update + unit tests
-- [ ] 03-05-PLAN.md — CLI integration + round-trip tests
+- [x] 03-01-PLAN.md — Change detector + protected blocks + provenance
+- [x] 03-02-PLAN.md — Conflict resolver (three-tier)
+- [x] 03-03-PLAN.md — Vault re-ingester
+- [x] 03-04-PLAN.md — VaultNoteWriter update + unit tests
+- [x] 03-05-PLAN.md — CLI integration + round-trip tests
 
 ### Exit Criteria
-- [ ] Manual edits preserved after rebuild
-- [ ] Vault changes reflected in graph
-- [ ] No data loss on round-trip
+- [x] Manual edits preserved after rebuild
+- [x] Vault changes reflected in graph
+- [x] No data loss on round-trip
 
 ---
 
@@ -404,6 +405,6 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 
 ## Current Position
 
-**Phase:** 3 (Round-Trip Editing) - Ready for execution
-**Completed:** Phase 0, Phase 1, Phase 2, Phase 7
-**Next Action:** Execute Phase 3 with `/gsd:execute-phase 3`
+**Phase:** 4 (Validation) - Ready for planning
+**Completed:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 7
+**Next Action:** Plan Phase 4 with `/gsd:plan-phase 4`
