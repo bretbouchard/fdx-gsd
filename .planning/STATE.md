@@ -1,18 +1,18 @@
 # STATE: FDX GSD
 
 **Last Updated:** 2026-02-19
-**Session:** Phase 2 in Progress
+**Session:** Phase 3 in Progress
 
 ---
 
 ## Current Position
 
-**Phase:** 2 of 8 (script-composition)
-**Plan:** 3 of 3 (02-03 complete)
+**Phase:** 3 of 8 (round-trip-editing)
+**Plan:** 1 of 3 (03-01 complete)
 **Status:** In progress
-**Mood:** 🟢 Executing Phase 2
+**Mood:** 🟢 Executing Phase 3
 
-**Progress:** █████░░░░░ 50% (Phase 0, 1, 7 complete)
+**Progress:** ██████░░░░ 56% (Phase 0, 1, 2, 7 complete; Phase 3 started)
 
 ---
 
@@ -20,26 +20,21 @@
 
 | When | What |
 |------|------|
+| 2026-02-19 | **Phase 3 Plan 01** - Sync foundation module (change detection, protected blocks, provenance) |
+| 2026-02-19 | **Phase 2 COMPLETE** - All 3 plans executed |
 | 2026-02-19 | **Phase 2 Plan 03** - CLI integration + 17 integration tests for full pipeline |
 | 2026-02-19 | **Phase 2 Plan 02** - Dialogue formatter integration |
 | 2026-02-19 | **Phase 2 Plan 01** - ScriptBuilder core with sluglines, beats, dialogue extraction |
 | 2026-02-19 | **Phase 1 COMPLETE** - All 4 plans executed across 3 waves |
-| 2026-02-19 | **Phase 1 Plan 04** - Disambiguation workflow with vault updates + audit trail |
-| 2026-02-19 | **Phase 1 Plan 03** - CLI polish + deterministic builds |
-| 2026-02-19 | **Phase 1 Plan 02** - CanonBuilder vault integration |
-| 2026-02-19 | **Phase 1 Plan 01** - VaultNoteWriter + templates |
 | 2026-02-19 | **Phase 7 COMPLETE** - Media Asset Archive System |
-| 2026-02-19 | Project structure created |
-| 2026-02-19 | Phase 0 CLI implemented (new-project, ingest, status) |
-| 2026-02-19 | FDX writer implemented |
-| 2026-02-19 | Test framework: 137 tests passing (120 + 17 new) |
+| 2026-02-19 | Test framework: 137 tests passing |
 
 ---
 
 ## Active Work
 
 ### Current Task
-Phase 2 Plan 3 complete. Phase 2 Script Composition COMPLETE.
+Phase 3 Plan 1 complete. Ready for Plan 2.
 
 ### Completed Phases
 - ✅ Phase 0: Foundation
@@ -47,10 +42,10 @@ Phase 2 Plan 3 complete. Phase 2 Script Composition COMPLETE.
 - ✅ Phase 2: Script Composition
 - ✅ Phase 7: Media Asset Archive (parallel track)
 
-### Phase 2 Progress
-- ✅ Plan 01: ScriptBuilder core (sluglines, beats, dialogue)
-- ✅ Plan 02: Dialogue formatter integration
-- ✅ Plan 03: CLI integration + 17 integration tests
+### Phase 3 Progress
+- ✅ Plan 01: Sync foundation module (ChangeDetector, protected blocks, ProvenanceTracker)
+- ⬜ Plan 02: Bidirectional sync implementation
+- ⬜ Plan 03: CLI integration for sync
 
 ---
 
@@ -86,6 +81,12 @@ Phase 2 Plan 3 complete. Phase 2 Script Composition COMPLETE.
 7. Character lookup uses normalized name index (exact, case-insensitive, alias matching)
 8. Character paragraph meta includes: character_id, match_confidence, match_type
 
+### Key Decisions Made (Phase 3 - Round-Trip Editing)
+1. SHA-256 hashing for file content detection
+2. Protected blocks use CONFUCIUS markers matching existing vault templates
+3. Provenance uses append-only log pattern for audit trail integrity
+4. SourceType enum for categorizing change sources (canon_build, script_build, manual_edit, etc.)
+
 ### Patterns to Remember
 - Every derived fact needs evidence link
 - Disambiguation queue prevents wrong merges
@@ -100,6 +101,7 @@ Phase 2 Plan 3 complete. Phase 2 Script Composition COMPLETE.
 - **Sort JSON output (entities by type/id, queue items by id, evidence_ids) for deterministic builds**
 - **ScriptBuilder pattern: load StoryGraph -> build scenes -> write ScriptGraph**
 - **CLI command pattern: import builder -> check prerequisites -> run -> report results**
+- **Sync pattern: ChangeDetector baseline -> detect changes -> track in ProvenanceTracker**
 
 ### Things to Avoid
 - Don't use bare names when canonical entities exist
@@ -133,8 +135,8 @@ Phase 2 Plan 3 complete. Phase 2 Script Composition COMPLETE.
 
 ## Next Actions
 
-1. **Phase 2 COMPLETE** - All 3 plans executed
-2. **Next Phase:** Phase 3 (Export enhancements) or continue with remaining phases
+1. **Phase 3 Plan 1 COMPLETE** - Sync foundation module
+2. **Next:** Phase 3 Plan 2 - Bidirectional sync implementation
 
 ---
 
@@ -150,6 +152,7 @@ fdx_gsd/
 │   └── phases/
 │       ├── 01-canon-extraction/ ✅ (4 plans complete)
 │       ├── 02-script-composition/ ✅ (3 plans complete)
+│       ├── 03-round-trip-editing/ 🔄 (1 plan complete)
 │       └── 07-media-archive/    ✅ (7 plans complete)
 ├── .beads/                      ✅
 ├── .github/workflows/ci.yml     ✅
@@ -163,7 +166,8 @@ fdx_gsd/
 │   ├── archive/                 ✅ (media asset tracking)
 │   ├── storygraph/              ✅ (schema)
 │   ├── scriptgraph/             ✅ (schema + validation utils)
-│   └── script/                  ✅ (ScriptBuilder, SluglineGenerator, BeatExtractor, DialogueFormatter)
+│   ├── script/                  ✅ (ScriptBuilder, SluglineGenerator, BeatExtractor, DialogueFormatter)
+│   └── sync/                    ✅ (ChangeDetector, protected_blocks, ProvenanceTracker)
 ├── templates/project_template/  ✅
 ├── tests/
 │   ├── unit/                    ✅ (120 tests)
