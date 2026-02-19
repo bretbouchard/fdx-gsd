@@ -408,5 +408,142 @@ JUDGE WALKER presides. ^ev_a1b2
         assert len(entities_with_evidence) >= 1
 
 
+class TestEndToEndIntegration:
+    """End-to-end integration tests for full canon build with vault output."""
+
+    def test_full_e2e_canon_build(self, temp_project):
+        """Test complete canon build with vault note creation."""
+        # Create inbox file with comprehensive screenplay content
+        inbox_file = temp_project / "inbox" / "screenplay.md"
+        inbox_file.write_text("""# Test Screenplay
+
+INT. COFFEE SHOP - DAY
+
+JOHN sits at a corner table, reading a newspaper. ^ev_001
+
+MARY enters, looking around nervously. ^ev_002
+
+JOHN
+(waving)
+Over here, Mary!
+
+MARY walks to John's table and sits down. ^ev_003
+
+EXT. PARK - LATER
+
+John and Mary walk together through the park. ^ev_004
+
+JOHN
+It's a beautiful day.
+
+MARY
+I'm glad we finally met.
+
+EXT. CITY STREET - NIGHT
+
+JOHN walks alone down the empty street. ^ev_005
+""")
+
+        config = yaml.safe_load((temp_project / "gsd.yaml").read_text())
+        config["disambiguation"]["always_ask_new"] = False
+
+        builder = CanonBuilder(temp_project, config)
+        result = builder.build()
+
+        # Verify build succeeded
+        assert result.success
+
+        # Verify storygraph has entities
+        storygraph_path = temp_project / "build" / "storygraph.json"
+        storygraph = json.loads(storygraph_path.read_text())
+        assert len(storygraph["entities"]) > 0
+
+        # Verify vault character notes
+        char_dir = temp_project / "vault" / "10_Characters"
+        char_notes = list(char_dir.glob("*.md"))
+        assert len(char_notes) >= 2  # John and Mary
+
+        # Verify vault location notes
+        loc_dir = temp_project / "vault" / "20_Locations"
+        loc_notes = list(loc_dir.glob("*.md"))
+        assert len(loc_notes) >= 1  # At least Coffee Shop
+
+        # Verify vault scene notes
+        scene_dir = temp_project / "vault" / "50_Scenes"
+        scene_notes = list(scene_dir.glob("*.md"))
+        assert len(scene_notes) >= 3  # At least 3 scenes
+
+        # Verify vault notes have evidence links
+        for note in char_notes:
+            content = note.read_text()
+            # Should have evidence section
+            assert "## Evidence" in content or "evidence" in content.lower()
+
+    def test_deterministic_build_output(self, temp_project):
+        """Test that running build twice produces identical output."""
+        # Create inbox file
+        inbox_file = temp_project / "inbox" / "deterministic.md"
+        inbox_file.write_text("""# Determinism Test
+
+INT. OFFICE - DAY
+
+ALICE types on her keyboard. ^ev_d1
+
+BOB enters the room. ^ev_d2
+
+EXT. ROOFTOP - NIGHT
+
+Alice and Bob look at the city lights. ^ev_d3
+""")
+
+        config = yaml.safe_load((temp_project / "gsd.yaml").read_text())
+        config["disambiguation"]["always_ask_new"] = False
+
+        # First build
+        builder1 = CanonBuilder(temp_project, config)
+        result1 = builder1.build()
+        assert result1.success
+
+        # Capture first build output (excluding timestamps)
+        storygraph1_path = temp_project / "build" / "storygraph.json"
+        storygraph1 = json.loads(storygraph1_path.read_text())
+        # Remove timestamp fields for comparison
+        storygraph1_copy = json.loads(json.dumps(storygraph1))
+
+        # Clear entities for second build (simulate fresh build)
+        storygraph1_path.write_text(json.dumps({
+            "version": "1.0",
+            "project_id": storygraph1_copy["project_id"],
+            "entities": [],
+            "edges": [],
+            "evidence_index": {}
+        }))
+
+        # Second build
+        builder2 = CanonBuilder(temp_project, config)
+        result2 = builder2.build()
+        assert result2.success
+
+        # Capture second build output
+        storygraph2 = json.loads(storygraph1_path.read_text())
+
+        # Compare entity counts
+        assert len(storygraph1_copy["entities"]) == len(storygraph2["entities"])
+
+        # Compare entity IDs (should be same order due to sorting)
+        ids1 = [e["id"] for e in storygraph1_copy["entities"]]
+        ids2 = [e["id"] for e in storygraph2["entities"]]
+        assert ids1 == ids2, f"Entity IDs differ: {ids1} vs {ids2}"
+
+        # Compare entity types and names
+        for i, (e1, e2) in enumerate(zip(storygraph1_copy["entities"], storygraph2["entities"])):
+            assert e1["id"] == e2["id"], f"Entity {i} ID differs"
+            assert e1["type"] == e2["type"], f"Entity {i} type differs"
+            assert e1["name"] == e2["name"], f"Entity {i} name differs"
+            # Evidence IDs should be sorted the same way
+            assert e1.get("evidence_ids", []) == e2.get("evidence_ids", []), \
+                f"Entity {i} evidence_ids differ"
+
+
 # Import yaml at module level
 import yaml
