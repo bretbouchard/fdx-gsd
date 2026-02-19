@@ -11,7 +11,7 @@
 ```
 Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4 ──► Phase 5 ──► Phase 6 ──► Phase 7
 Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender     Archive
-   ✅           🚧          📋          📋          📋         📋         📋           📋
+   ✅           ✅          📋          📋          📋         📋         📋           ✅
                                      │
                                      └──► Phase 7 (parallel track for media archive)
 ```
@@ -47,15 +47,15 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 
 ---
 
-## Phase 1: Canon Extraction 🚧 IN PROGRESS
+## Phase 1: Canon Extraction ✅ COMPLETE
 
 **Goal:** From vomit → clean scene list + entity list
 
-**Duration:** TBD
-**Status:** 🚧 In Progress
-**Plans:** 4 plans in 3 waves
+**Duration:** Complete (2026-02-19)
+**Status:** ✅ Complete
+**Plans:** 4 plans in 3 waves (all executed)
 
-### Requirements
+### Requirements Delivered
 - CAN-01: Character Extraction
 - CAN-02: Location Extraction
 - CAN-03: Scene Detection
@@ -70,25 +70,27 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 - ADR-0005: Confucius Integration Architecture
 
 ### Deliverables
-- [x] `gsd build canon` command (partial - needs vault writing)
+- [x] `gsd build canon` command with vault writing
 - [x] Character extraction pipeline (core extraction module)
 - [x] Location extraction pipeline (core extraction module)
 - [x] Scene detection heuristics (core extraction module)
 - [x] Alias resolution with fuzzy matching (core resolution module)
-- [ ] Disambiguation queue system (needs vault integration)
-- [x] `gsd resolve` interactive command (partial - needs vault updates)
+- [x] Disambiguation queue system with vault integration
+- [x] `gsd resolve` interactive command with vault updates
+- [x] VaultNoteWriter for Obsidian-compatible notes
+- [x] Deterministic builds (sorted output)
 
 ### Plans
-- [ ] 01-01-PLAN.md — Vault note templates and writer
-- [ ] 01-02-PLAN.md — CanonBuilder vault integration
-- [ ] 01-03-PLAN.md — CLI polish and deterministic builds
-- [ ] 01-04-PLAN.md — Disambiguation workflow completion
+- [x] 01-01-PLAN.md — Vault note templates and writer
+- [x] 01-02-PLAN.md — CanonBuilder vault integration
+- [x] 01-03-PLAN.md — CLI polish and deterministic builds
+- [x] 01-04-PLAN.md — Disambiguation workflow completion
 
 ### Exit Criteria
-- [ ] Ingest → Characters, Locations, Scenes in vault
-- [ ] Disambiguation queue populated
-- [ ] All entities have evidence links
-- [ ] StoryGraph JSON valid
+- [x] Ingest → Characters, Locations, Scenes in vault
+- [x] Disambiguation queue populated
+- [x] All entities have evidence links
+- [x] StoryGraph JSON valid
 
 ---
 
@@ -367,5 +369,6 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 
 ## Current Position
 
-**Phase:** 7 (Media Asset Archive) - Ready for execution
-**Next Action:** Execute Phase 7 plans with `/gsd:execute-phase 7`
+**Phase:** 2 (Script Composition) - Ready for planning
+**Completed:** Phase 0, Phase 1, Phase 7
+**Next Action:** Plan Phase 2 with `/gsd:plan-phase 2`

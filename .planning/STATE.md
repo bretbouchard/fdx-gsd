@@ -1,18 +1,18 @@
 # STATE: FDX GSD
 
 **Last Updated:** 2026-02-19
-**Session:** Initial Setup + Infrastructure + Decisions
+**Session:** Phase 1 Complete
 
 ---
 
 ## Current Position
 
-**Phase:** 1 of 10 (canon-extraction)
-**Plan:** 03 of 4 complete
-**Status:** In progress - CLI polish + deterministic builds complete
-**Mood:** 🟢 Ready to continue
+**Phase:** 2 of 8 (script-composition)
+**Plan:** Not started
+**Status:** Phase 1 complete, ready for Phase 2
+**Mood:** 🟢 Ready to plan
 
-**Progress:** ███░░░░░░░ 30%
+**Progress:** █████░░░░░ 50% (Phase 0, 1, 7 complete)
 
 ---
 
@@ -20,35 +20,28 @@
 
 | When | What |
 |------|------|
-| 2026-02-19 | **Phase 1 Plan 03: CLI Polish + Deterministic Builds** - Vault output in CLI, sorted JSON |
-| 2026-02-19 | **Phase 1 Plan 02: Vault Integration** - CanonBuilder with vault writing |
-| 2026-02-19 | **Phase 1 Plan 01: Note Templates** - VaultNoteWriter created |
+| 2026-02-19 | **Phase 1 COMPLETE** - All 4 plans executed across 3 waves |
+| 2026-02-19 | **Phase 1 Plan 04** - Disambiguation workflow with vault updates + audit trail |
+| 2026-02-19 | **Phase 1 Plan 03** - CLI polish + deterministic builds |
+| 2026-02-19 | **Phase 1 Plan 02** - CanonBuilder vault integration |
+| 2026-02-19 | **Phase 1 Plan 01** - VaultNoteWriter + templates |
+| 2026-02-19 | **Phase 7 COMPLETE** - Media Asset Archive System |
 | 2026-02-19 | Project structure created |
 | 2026-02-19 | Phase 0 CLI implemented (new-project, ingest, status) |
 | 2026-02-19 | FDX writer implemented |
-| 2026-02-19 | JSON schemas defined |
-| 2026-02-19 | GSD planning docs created (PROJECT, REQUIREMENTS, ROADMAP) |
-| 2026-02-19 | Beads tracking initialized and synced |
-| 2026-02-19 | Test framework set up (pytest, fixtures) |
-| 2026-02-19 | CI pipeline created (GitHub Actions) |
-| 2026-02-19 | Pre-commit hooks configured |
-| 2026-02-19 | **ADR-0002: NER Approach - Interactive Disambiguation** |
-| 2026-02-19 | **ADR-0003: Fuzzy Matching - rapidfuzz** |
-| 2026-02-19 | **ADR-0004: Confidence Thresholds - Configurable** |
-| 2026-02-19 | **ADR-0005: Confucius Integration Architecture** |
-| 2026-02-19 | Updated gsd.yaml with disambiguation settings |
-| 2026-02-19 | Added rapidfuzz to dependencies |
+| 2026-02-19 | Test framework: 94 tests passing |
 
 ---
 
 ## Active Work
 
 ### Current Task
-Phase 1 Plan 03 complete - CLI polish + deterministic builds finished.
+Phase 1 (Canon Extraction) complete. Ready for Phase 2 (Script Composition).
 
-### Ready Work (from Beads)
-1. `fdx_gsd-2`: PHASE-1: Canon Extraction (in progress)
-2. Continue with Plan 04 or next phase
+### Completed Phases
+- ✅ Phase 0: Foundation
+- ✅ Phase 1: Canon Extraction
+- ✅ Phase 7: Media Asset Archive (parallel track)
 
 ---
 
@@ -72,6 +65,7 @@ Phase 1 Plan 03 complete - CLI polish + deterministic builds finished.
 6. GSD + Beads for tracking (no untracked work)
 7. Pre-commit hooks enforce REQ-ID in commits
 8. CI validates tests, schemas, builds
+9. Deterministic builds (sorted JSON output)
 
 ### Patterns to Remember
 - Every derived fact needs evidence link
@@ -102,13 +96,13 @@ Phase 1 Plan 03 complete - CLI polish + deterministic builds finished.
 | Bead ID | Title | Status |
 |---------|-------|--------|
 | fdx_gsd-1 | PHASE-0: Foundation Complete | ✅ Closed |
-| fdx_gsd-2 | PHASE-1: Canon Extraction | 📋 Ready to plan |
-| fdx_gsd-3 | REQ-CAN-01: Character Extraction | 🚧 Blocked by phase |
-| fdx_gsd-4 | REQ-CAN-02: Location Extraction | 🚧 Blocked by phase |
-| fdx_gsd-5 | REQ-CAN-03: Scene Detection | 🚧 Blocked by phase |
-| fdx_gsd-6 | REQ-CAN-04: Alias Resolution | 🚧 Blocked by phase |
-| fdx_gsd-7 | REQ-CAN-05: Disambiguation Queue | 🚧 Blocked by phase |
-| fdx_gsd-8 | REQ-CAN-06: Evidence Linking | 🚧 Blocked by phase |
+| fdx_gsd-2 | PHASE-1: Canon Extraction | ✅ Closed |
+| fdx_gsd-3 | REQ-CAN-01: Character Extraction | ✅ Closed |
+| fdx_gsd-4 | REQ-CAN-02: Location Extraction | ✅ Closed |
+| fdx_gsd-5 | REQ-CAN-03: Scene Detection | ✅ Closed |
+| fdx_gsd-6 | REQ-CAN-04: Alias Resolution | ✅ Closed |
+| fdx_gsd-7 | REQ-CAN-05: Disambiguation Queue | ✅ Closed |
+| fdx_gsd-8 | REQ-CAN-06: Evidence Linking | ✅ Closed |
 | fdx_gsd-9 | INFRA: Test Framework Setup | ✅ Closed |
 | fdx_gsd-10 | INFRA: CI Pipeline Setup | ✅ Closed |
 | fdx_gsd-11 | INFRA: Pre-commit Hooks | ✅ Closed |
@@ -116,41 +110,10 @@ Phase 1 Plan 03 complete - CLI polish + deterministic builds finished.
 
 ---
 
-## Resolved Questions
-
-### Q1: NER Approach ✅
-**Decision:** Interactive disambiguation, no ML library
-- Lightweight regex extraction
-- Always ask on ambiguity
-- Store aliases to canonical UUID
-
-### Q2: Test Data Source ✅
-**Decision:** Public domain screenplays
-- Classic films with known character/location sets
-- Validates extraction against known canon
-- No copyright concerns
-
-### Q3: Confidence Thresholds ✅
-**Decision:** Configurable per project in gsd.yaml
-- Default: auto_accept 0.95, auto_reject 0.30
-- User can tune for project needs
-
-### Q4: Confucius Integration ✅
-**Decision:** Confucius MCP IS the memory system
-- Orchestration agent is separate
-- Uses Confucius MCP for pattern/decision storage
-- Clear separation of concerns
-
-### Q5: What Else Is Missing ✅
-**Decision:** Nothing - ready for Phase 1
-
----
-
 ## Next Actions
 
-1. **Continue Phase 1** - Execute Plan 04 if exists, or proceed to next phase
-2. **CLI tested** - All 94 tests pass including e2e integration tests
-3. **Update beads** - Mark completed work
+1. **Plan Phase 2** - Script Composition with `/gsd:plan-phase 2`
+2. **Execute Phase 2** - Generate screenplay paragraphs + export .fdx
 
 ---
 
@@ -163,27 +126,27 @@ fdx_gsd/
 │   ├── REQUIREMENTS.md         ✅
 │   ├── ROADMAP.md              ✅
 │   ├── STATE.md                ✅ (this file)
-│   └── TOOLING-ASSESSMENT.md   ✅
+│   └── phases/
+│       ├── 01-canon-extraction/ ✅ (4 plans complete)
+│       └── 07-media-archive/    ✅ (7 plans complete)
 ├── .beads/                      ✅
 ├── .github/workflows/ci.yml     ✅
 ├── apps/cli/                    ✅
 ├── core/
 │   ├── exporters/               ✅ (FDX writer)
+│   ├── extraction/              ✅ (character, location, scene)
+│   ├── resolution/              ✅ (fuzzy matching)
+│   ├── canon/                   ✅ (CanonBuilder, vault integration)
+│   ├── vault/                   ✅ (VaultNoteWriter, templates)
+│   ├── archive/                 ✅ (media asset tracking)
 │   ├── storygraph/              ✅ (schema)
-│   ├── scriptgraph/             ✅ (schema)
-│   └── build/                   ✅ (schemas)
+│   └── scriptgraph/             ✅ (schema)
 ├── templates/project_template/  ✅
 ├── tests/
-│   ├── unit/                    ✅ (FDX tests)
-│   ├── integration/             (empty)
-│   └── fixtures/                ✅ (sample story)
-├── docs/adr/
-│   ├── README.md                ✅
-│   ├── 0001-ner-approach.md     ✅
-│   ├── 0002-ner-approach.md     ✅
-│   ├── 0003-fuzzy-matching.md   ✅
-│   ├── 0004-confidence.md       ✅
-│   └── 0005-confucius.md        ✅
+│   ├── unit/                    ✅ (94 tests)
+│   ├── integration/             ✅
+│   └── fixtures/                ✅
+├── docs/adr/                    ✅
 ├── scripts/                     ✅
 ├── .pre-commit-config.yaml      ✅
 ├── .gitignore                   ✅
