@@ -8,7 +8,7 @@
 ## Current Position
 
 **Phase:** 3 of 8 (round-trip-editing)
-**Plan:** 1 of 3 (03-01 complete)
+**Plan:** 2 of 3 (03-02 complete)
 **Status:** In progress
 **Mood:** 🟢 Executing Phase 3
 
@@ -20,6 +20,7 @@
 
 | When | What |
 |------|------|
+| 2026-02-19 | **Phase 3 Plan 02** - Three-tier conflict resolution (ConflictResolver, Conflict, ConflictTier, ConflictStatus) |
 | 2026-02-19 | **Phase 3 Plan 01** - Sync foundation module (change detection, protected blocks, provenance) |
 | 2026-02-19 | **Phase 2 COMPLETE** - All 3 plans executed |
 | 2026-02-19 | **Phase 2 Plan 03** - CLI integration + 17 integration tests for full pipeline |
@@ -34,7 +35,7 @@
 ## Active Work
 
 ### Current Task
-Phase 3 Plan 1 complete. Ready for Plan 2.
+Phase 3 Plan 2 complete. Ready for Plan 3.
 
 ### Completed Phases
 - ✅ Phase 0: Foundation
@@ -44,7 +45,7 @@ Phase 3 Plan 1 complete. Ready for Plan 2.
 
 ### Phase 3 Progress
 - ✅ Plan 01: Sync foundation module (ChangeDetector, protected blocks, ProvenanceTracker)
-- ⬜ Plan 02: Bidirectional sync implementation
+- ✅ Plan 02: Conflict resolution (ConflictResolver, three-tier classification)
 - ⬜ Plan 03: CLI integration for sync
 
 ---
@@ -86,6 +87,9 @@ Phase 3 Plan 1 complete. Ready for Plan 2.
 2. Protected blocks use CONFUCIUS markers matching existing vault templates
 3. Provenance uses append-only log pattern for audit trail integrity
 4. SourceType enum for categorizing change sources (canon_build, script_build, manual_edit, etc.)
+5. Three-tier conflict classification: SAFE (auto-merge arrays), AMBIGUOUS (review scalars), CRITICAL (block identity changes)
+6. SAFE tier only applies to array additions (aliases, evidence_ids, tags)
+7. CRITICAL tier blocks operations on identity fields (entity_id, canonical_id, entity_type, name)
 
 ### Patterns to Remember
 - Every derived fact needs evidence link
@@ -102,6 +106,7 @@ Phase 3 Plan 1 complete. Ready for Plan 2.
 - **ScriptBuilder pattern: load StoryGraph -> build scenes -> write ScriptGraph**
 - **CLI command pattern: import builder -> check prerequisites -> run -> report results**
 - **Sync pattern: ChangeDetector baseline -> detect changes -> track in ProvenanceTracker**
+- **Conflict pattern: Detect conflict -> classify tier -> auto-merge SAFE / flag AMBIGUOUS / block CRITICAL**
 
 ### Things to Avoid
 - Don't use bare names when canonical entities exist
@@ -135,8 +140,8 @@ Phase 3 Plan 1 complete. Ready for Plan 2.
 
 ## Next Actions
 
-1. **Phase 3 Plan 1 COMPLETE** - Sync foundation module
-2. **Next:** Phase 3 Plan 2 - Bidirectional sync implementation
+1. **Phase 3 Plan 2 COMPLETE** - Three-tier conflict resolution
+2. **Next:** Phase 3 Plan 3 - CLI integration for sync
 
 ---
 
@@ -152,7 +157,7 @@ fdx_gsd/
 │   └── phases/
 │       ├── 01-canon-extraction/ ✅ (4 plans complete)
 │       ├── 02-script-composition/ ✅ (3 plans complete)
-│       ├── 03-round-trip-editing/ 🔄 (1 plan complete)
+│       ├── 03-round-trip-editing/ 🔄 (2 plans complete)
 │       └── 07-media-archive/    ✅ (7 plans complete)
 ├── .beads/                      ✅
 ├── .github/workflows/ci.yml     ✅
@@ -167,7 +172,7 @@ fdx_gsd/
 │   ├── storygraph/              ✅ (schema)
 │   ├── scriptgraph/             ✅ (schema + validation utils)
 │   ├── script/                  ✅ (ScriptBuilder, SluglineGenerator, BeatExtractor, DialogueFormatter)
-│   └── sync/                    ✅ (ChangeDetector, protected_blocks, ProvenanceTracker)
+│   └── sync/                    ✅ (ChangeDetector, protected_blocks, ProvenanceTracker, ConflictResolver)
 ├── templates/project_template/  ✅
 ├── tests/
 │   ├── unit/                    ✅ (120 tests)
