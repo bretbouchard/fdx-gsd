@@ -20,6 +20,15 @@ class ExtractionPattern:
 
 # Character extraction patterns
 CHARACTER_PATTERNS = [
+    # Character with extension (e.g., JOHN (V.O.), SARAH (O.S.)) - must be first for priority
+    ExtractionPattern(
+        name="character_with_extension",
+        pattern=re.compile(r'^([A-Z][A-Z\s]+?)\s*\((V\.?O\.?|O\.?S\.?|O\.?C\.?|CONT\'D|OFF SCREEN|VOICE OVER)\)$'),
+        entity_type="character",
+        confidence_base=0.95,
+        description="Character name with extension (V.O., O.S., CONT'D)"
+    ),
+
     # ALL CAPS names in dialogue (e.g., FOX, SARAH)
     ExtractionPattern(
         name="dialogue_caps",
@@ -56,6 +65,13 @@ CHARACTER_PATTERNS = [
         description="Names in possessive form"
     ),
 ]
+
+# Dual dialogue pattern (for scene extraction, indicates simultaneous dialogue)
+DUAL_DIALOGUE_PATTERN = re.compile(
+    r'^([A-Z][A-Z\s]+?)\s*$\n\s*\n'
+    r'^([A-Z][A-Z\s]+?)\s*$',
+    re.MULTILINE
+)
 
 
 # Location extraction patterns

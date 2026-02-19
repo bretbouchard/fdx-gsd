@@ -99,6 +99,45 @@ class TestCharacterExtractor:
         # Should extract something
         assert len(candidates) >= 1
 
+    def test_extract_character_with_vo_extension(self, extractor):
+        """Extract character name with V.O. extension."""
+        candidates = extractor.extract_from_line(
+            line="JOHN (V.O.)",
+            source_file="test.md",
+            line_number=1,
+            block_ref="ev_1",
+        )
+        # Should extract with extension metadata
+        assert len(candidates) >= 1
+        assert candidates[0].metadata.get("has_extension") is True
+        assert candidates[0].metadata.get("extension") == "V.O."
+
+    def test_extract_character_with_os_extension(self, extractor):
+        """Extract character name with O.S. extension."""
+        candidates = extractor.extract_from_line(
+            line="SARAH (O.S.)",
+            source_file="test.md",
+            line_number=1,
+            block_ref="ev_1",
+        )
+        # Should extract with extension metadata
+        assert len(candidates) >= 1
+        assert candidates[0].metadata.get("has_extension") is True
+        assert candidates[0].metadata.get("extension") == "O.S."
+
+    def test_extract_character_with_contd_extension(self, extractor):
+        """Extract character name with CONT'D extension."""
+        candidates = extractor.extract_from_line(
+            line="JOHN (CONT'D)",
+            source_file="test.md",
+            line_number=1,
+            block_ref="ev_1",
+        )
+        # Should extract with extension metadata
+        assert len(candidates) >= 1
+        assert candidates[0].metadata.get("has_extension") is True
+        assert candidates[0].metadata.get("extension") == "CONT'D"
+
 
 class TestLocationExtractor:
     """Tests for location extraction."""

@@ -46,6 +46,25 @@ class CharacterExtractor(BaseExtractor):
         if pattern and "role_reference" in pattern.name:
             metadata["is_role"] = True
 
+        # Check for character with extension (V.O., O.S., CONT'D)
+        if pattern and "character_with_extension" in pattern.name:
+            # Group 1 is the name, Group 2 is the extension
+            if match.lastindex >= 2:
+                extension = match.group(2).upper().replace('.', '')
+                # Normalize extension
+                if extension in ('VO', 'V O', 'VOICE OVER'):
+                    metadata["extension"] = "V.O."
+                elif extension in ('OS', 'O S', 'OFF SCREEN'):
+                    metadata["extension"] = "O.S."
+                elif extension in ('OC', 'O C'):
+                    metadata["extension"] = "O.C."
+                elif extension in ("CONT'D", 'CONTD'):
+                    metadata["extension"] = "CONT'D"
+                else:
+                    metadata["extension"] = match.group(2)
+
+                metadata["has_extension"] = True
+
         return metadata
 
     def set_known_aliases(self, aliases: Dict[str, str]):
