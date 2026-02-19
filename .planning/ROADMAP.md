@@ -11,7 +11,7 @@
 ```
 Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4 ──► Phase 5 ──► Phase 6 ──► Phase 7
 Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender     Archive
-   ✅           ✅          📋          📋          📋         📋         📋           ✅
+   ✅           ✅          ✅          📋          📋         📋         📋           ✅
                                      │
                                      └──► Phase 7 (parallel track for media archive)
 ```
@@ -94,32 +94,49 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 
 ---
 
-## Phase 2: Script Composition 📋 PLANNED
+## Phase 2: Script Composition ✅ COMPLETE
 
 **Goal:** Generate real screenplay paragraphs + export .fdx
 
-**Duration:** TBD
+**Duration:** Complete (2026-02-19)
+**Status:** ✅ Complete
+**Plans:** 3 plans in 2 waves (all executed)
 **Depends On:** Phase 1
 
-### Requirements
+### Requirements Delivered
 - SCR-01: Slugline Generation
 - SCR-02: Beat Sheet Composition
 - SCR-03: Dialogue Formatting
 - SCR-04: ScriptGraph Generation
-- INF-03: Deterministic Builds
+- INF-03: Deterministic Builds (already implemented)
+
+### Key Decisions
+- Follow CanonBuilder pattern for ScriptBuilder
+- FDXWriter already complete - only needs ScriptGraph input
+- No new dependencies needed
+- Scene boundaries from Phase 1 (StoryGraph scene entities)
+- Evidence traceability mandatory - every paragraph needs evidence_ids
+- Character lookup uses normalized name index (exact, case-insensitive, alias matching)
+- XML declaration quote style is flexible (ElementTree uses single quotes)
 
 ### Deliverables
-- [ ] `gsd build script` command
-- [ ] Scene → paragraphs mapping
-- [ ] Dialogue formatting rules
-- [ ] ScriptGraph generation
-- [ ] Fountain export (optional)
-- [ ] Test suite for FDX correctness
+- [x] `gsd build script` command
+- [x] ScriptBuilder class (reads StoryGraph, produces ScriptGraph)
+- [x] Beat extraction (action beats from inbox content)
+- [x] Dialogue detection and formatting
+- [x] ScriptGraph generation with full evidence linking
+- [x] Test suite for FDX correctness (17 integration tests + 34 unit tests)
+
+### Plans
+- [x] 02-01-PLAN.md — ScriptBuilder + beat extraction + sluglines
+- [x] 02-02-PLAN.md — Dialogue formatting + character resolution
+- [x] 02-03-PLAN.md — CLI integration + end-to-end testing
 
 ### Exit Criteria
-- [ ] ScriptGraph JSON valid
-- [ ] FDX export opens in Final Draft
-- [ ] Deterministic rebuild works
+- [x] ScriptGraph JSON valid
+- [x] FDX export opens in Final Draft
+- [x] Deterministic rebuild works
+- [x] All paragraphs have evidence_ids
 
 ---
 
@@ -369,6 +386,6 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 
 ## Current Position
 
-**Phase:** 2 (Script Composition) - Ready for planning
-**Completed:** Phase 0, Phase 1, Phase 7
-**Next Action:** Plan Phase 2 with `/gsd:plan-phase 2`
+**Phase:** 3 (Round-Trip Editing) - Ready for planning
+**Completed:** Phase 0, Phase 1, Phase 2, Phase 7
+**Next Action:** Plan Phase 3 with `/gsd:plan-phase 3`

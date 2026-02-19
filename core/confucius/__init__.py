@@ -10,9 +10,12 @@ Per ADR-0005: Confucius MCP IS the memory system.
 The orchestration agent uses this for all pattern/decision storage.
 """
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class MemoryScope(str, Enum):
@@ -38,15 +41,9 @@ class MemoryEntry:
     type: MemoryType
     content: str
     scope: MemoryScope = MemoryScope.SESSION
-    tags: List[str] = None
+    tags: List[str] = field(default_factory=list)
     confidence: float = 1.0
-    metadata: Dict[str, Any] = None
-
-    def __post_init__(self):
-        if self.tags is None:
-            self.tags = []
-        if self.metadata is None:
-            self.metadata = {}
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 class ConfuciusClient:
@@ -78,7 +75,7 @@ class ConfuciusClient:
         self._session_memory.append(entry)
 
         # Log for debugging
-        print(f"[Confucius] Stored {entry.type.value}: {entry.content[:50]}...")
+        logger.debug("Stored %s: %s...", entry.type.value, entry.content[:50])
 
         return True
 

@@ -297,6 +297,86 @@ The system MUST generate layout briefs for Blender_GSD.
 
 ---
 
+## Phase 7 Requirements (Media Asset Archive)
+
+### ARC-01: Song/Work Registration
+**Priority:** P1 | **Status:** 📋 Planned
+
+The system MUST register creative works with full metadata and aliases.
+
+**Acceptance Criteria:**
+- [ ] `gsd archive register "Song Title"` creates work entry
+- [ ] Multiple aliases supported (--alias "Working Title" --alias "Demo Name")
+- [ ] Genre, year, ISRC/ISBN metadata fields
+- [ ] Canonical UUID generated for cross-referencing
+- [ ] Works searchable by any alias
+
+### ARC-02: Realization Tracking
+**Priority:** P1 | **Status:** 📋 Planned
+
+The system MUST track multiple realizations (versions) of a work.
+
+**Acceptance Criteria:**
+- [ ] `gsd archive realize {work_id} --name "Studio Version"` creates realization
+- [ ] DAW session files tracked (.als, .flp, .ptx, .logic)
+- [ ] Stem files organized by realization
+- [ ] Master outputs linked to realization
+- [ ] Engineer, studio, date metadata captured
+
+### ARC-03: Performance Archive
+**Priority:** P1 | **Status:** 📋 Planned
+
+The system MUST archive live performances and takes.
+
+**Acceptance Criteria:**
+- [ ] `gsd archive perform {work_id} --date 2026-02-19 --venue "The Troubadour"`
+- [ ] Audio files organized (WAV, FLAC, MP3)
+- [ ] Video files supported (MP4, MOV)
+- [ ] Personnel tracked (performers, crew)
+- [ ] Setlist ordering for multi-song performances
+
+### ARC-04: Alias Management
+**Priority:** P0 | **Status:** 📋 Planned
+
+The system MUST maintain a global alias registry for all entities.
+
+**Acceptance Criteria:**
+- [ ] `aliases.json` maps all aliases to canonical IDs
+- [ ] Works: multiple titles map to same work_id
+- [ ] Artists: stage names map to real names (optional)
+- [ ] Locations: alternate names cross-referenced
+- [ ] Fuzzy search finds correct entity from partial alias
+- [ ] Alias conflicts flagged for resolution
+
+### ARC-05: Media Storage (Git LFS)
+**Priority:** P0 | **Status:** 📋 Planned
+
+The system MUST store binary media files using Git LFS.
+
+**Acceptance Criteria:**
+- [ ] `.gitattributes` configured for all binary types
+- [ ] Audio: .wav, .flac, .mp3, .aiff, .ogg
+- [ ] Video: .mp4, .mov, .avi, .mkv
+- [ ] Images: .png, .jpg, .psd, .ai, .svg
+- [ ] DAW: .als, .flp, .ptx, .logic
+- [ ] Git LFS bandwidth monitoring
+- [ ] Large file warnings before commit
+
+### ARC-06: Private Repository Management
+**Priority:** P0 | **Status:** 📋 Planned
+
+The system MUST create and manage private repositories.
+
+**Acceptance Criteria:**
+- [ ] `gsd archive init --private` creates private repo
+- [ ] GitHub private repo template
+- [ ] GitLab private repo template (optional)
+- [ ] Access control documented
+- [ ] Backup strategy defined
+- [ ] Clone instructions generated
+
+---
+
 ## Infrastructure Requirements
 
 ### INF-03: Deterministic Builds
@@ -361,5 +441,6 @@ Core functionality MUST have test coverage.
 | 4 - Validation | 5 | - | 5 | - |
 | 5 - Shots | 2 | - | - | 2 |
 | 6 - Blender | 1 | - | - | 1 |
+| 7 - Archive | 6 | 3 | 3 | - |
 
-**Total:** 24 requirements (13 P0, 8 P1, 3 P2)
+**Total:** 30 requirements (16 P0, 11 P1, 3 P2)
