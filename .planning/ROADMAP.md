@@ -9,9 +9,11 @@
 ## Phase Overview
 
 ```
-Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4 ──► Phase 5 ──► Phase 6
-Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender
-   ✅           🚧          📋          📋          📋         📋         📋
+Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4 ──► Phase 5 ──► Phase 6 ──► Phase 7
+Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender     Archive
+   ✅           🚧          📋          📋          📋         📋         📋           📋
+                                     │
+                                     └──► Phase 7 (parallel track for media archive)
 ```
 
 ---
@@ -220,6 +222,121 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender
 
 ---
 
+## Phase 7: Media Asset Archive System 📋 PLANNED
+
+**Goal:** Archive and track all media realizations with Git LFS
+
+**Duration:** TBD
+**Status:** 📋 Ready to execute
+**Plans:** 7 plans in 5 waves
+**Depends On:** Phase 0 (can run parallel with Phase 1-6)
+
+### Requirements
+- ARC-01: Song/Work Registration
+- ARC-02: Realization Tracking
+- ARC-03: Performance Archive
+- ARC-04: Alias Management
+- ARC-05: Media Storage (Git LFS)
+- ARC-06: Private Repository Management
+
+### Key Concepts
+
+**Work Hierarchy:**
+```
+Work (Song/Composition)
+├── Realizations (Studio recordings, Demo versions, Remixes)
+│   ├── Sessions (DAW project files)
+│   ├── Stems (Individual tracks)
+│   └── Masters (Final mixes)
+├── Performances (Live recordings, Takes)
+│   ├── Audio (WAV, FLAC, MP3)
+│   ├── Video (MP4, MOV)
+│   └── Metadata (Date, venue, personnel)
+└── Assets (Artwork, Graphics, Documentation)
+    ├── Cover Art (PNG, JPG, SVG)
+    ├── Graphics (Logos, promotional)
+    └── Docs (Lyrics, credits, notes)
+```
+
+**Alias Tracking:**
+- Works can have multiple titles/aliases
+- Artists can have stage names vs real names
+- Locations can have alternate names
+- Cross-reference all aliases to canonical IDs
+
+### Deliverables
+- [ ] `gsd archive init` - Initialize archive repository
+- [ ] `gsd archive register` - Register new work with aliases
+- [ ] `gsd archive realize` - Add a realization of a work
+- [ ] `gsd archive perform` - Archive a performance
+- [ ] `gsd archive status` - Show archive contents
+- [ ] Git LFS configuration for binary files
+- [ ] Private repository templates (GitHub/GitLab)
+- [ ] Media metadata schemas (JSON)
+- [ ] Alias resolution and search
+
+### Plans
+- [ ] 07-01-PLAN.md — Git LFS setup + archive models
+- [ ] 07-02-PLAN.md — Alias management system
+- [ ] 07-03-PLAN.md — Archive init command
+- [ ] 07-04-PLAN.md — Work registration
+- [ ] 07-05-PLAN.md — Realization tracking
+- [ ] 07-06-PLAN.md — Performance archive
+- [ ] 07-07-PLAN.md — Archive status + verification
+
+### Directory Structure
+```
+archive/
+├── works/
+│   └── {work_id}/
+│       ├── metadata.json          # Title, aliases, created, genre
+│       ├── realizations/
+│       │   └── {realization_id}/
+│       │       ├── metadata.json  # Version, date, studio, engineer
+│       │       ├── sessions/      # DAW projects (.als, .flp, .ptx)
+│       │       ├── stems/         # Individual tracks
+│       │       └── masters/       # Final outputs
+│       ├── performances/
+│       │   └── {performance_id}/
+│       │       ├── metadata.json  # Date, venue, personnel
+│       │       ├── audio/
+│       │       └── video/
+│       └── assets/
+│           ├── artwork/
+│           ├── graphics/
+│           └── docs/
+├── aliases.json                   # Global alias → canonical_id map
+└── index.json                     # Searchable index of all works
+```
+
+### Git LFS Configuration
+```yaml
+# .gitattributes
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.flac filter=lfs diff=lfs merge=lfs -text
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.aiff filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.ai filter=lfs diff=lfs merge=lfs -text
+*.als filter=lfs diff=lfs merge=lfs -text
+*.flp filter=lfs diff=lfs merge=lfs -text
+```
+
+### Exit Criteria
+- [ ] Can create private archive repository
+- [ ] Can register works with multiple aliases
+- [ ] Can add realizations with full session files
+- [ ] Can add performances with audio/video
+- [ ] Git LFS handles all binary files
+- [ ] Alias search finds correct work
+- [ ] Archive status shows complete hierarchy
+
+---
+
 ## Dependency Graph
 
 ```
@@ -227,15 +344,10 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
           │              │
           │              └──► (parallel testing)
           │
+          ├──► Phase 7 (Media Archive - parallel track)
+          │
           └──► (infrastructure: INF-03, INF-04, INF-05)
 ```
-
----
-
-## Current Position
-
-**Phase:** 1 (Canon Extraction) - Ready for execution
-**Next Action:** Execute Phase 1 plans with `/gsd:execute-phase 1`
 
 ---
 
@@ -249,3 +361,11 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 | 4 | False positives | Confidence thresholds, user tuning |
 | 5 | Over-complexity | Start with shot lists, defer spatial |
 | 6 | API instability | Minimal interface, version pinning |
+| 7 | Storage costs | Git LFS bandwidth limits, compression |
+
+---
+
+## Current Position
+
+**Phase:** 7 (Media Asset Archive) - Ready for execution
+**Next Action:** Execute Phase 7 plans with `/gsd:execute-phase 7`
