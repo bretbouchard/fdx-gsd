@@ -8,6 +8,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set
 
+from .dialogue import DialogueFormatter, CharacterMatch
+
 
 @dataclass
 class Paragraph:
@@ -47,14 +49,47 @@ class BeatExtractor:
         re.compile(r'^\^([a-z0-9_]+)$'),  # Block refs
     ]
 
-    def __init__(self, known_characters: Optional[List[str]] = None):
+    def __init__(
+        self,
+        known_characters: Optional[List[str]] = None,
+        character_entities: Optional[List[Dict]] = None
+    ):
         """
         Initialize the beat extractor.
 
         Args:
             known_characters: List of known character names for dialogue detection
+            character_entities: List of character entities from StoryGraph with id, name, aliases
         """
         self.known_characters = set(c.upper() for c in (known_characters or []))
+        self._character_entities = character_entities or []
+        self._dialogue_formatter: Optional[DialogueFormatter] = None
+
+    @property
+    def dialogue_formatter(self) -> DialogueFormatter:
+        """Lazy initialization of DialogueFormatter."""
+        if self._dialogue_formatter is None:
+            self._dialogue_formatter = DialogueFormatter(self._character_entities)
+        return self._dialogue_formatter
+
+    def set_character_entities(self, entities: List[Dict]) -> None:
+        """
+        Set character entities for dialogue resolution.
+
+        Args:
+            entities: List of character entities with id, name, aliases
+        """
+        self._character_entities = entities
+        # Reset formatter to rebuild with new entities
+        self._dialogue_formatter = None
+        # Also update known_characters set
+        for entity in entities:
+            name = entity.get("name", "")
+            if name:
+                self.known_characters.add(name.upper())
+                for alias in entity.get("aliases", []):
+                    if alias:
+                        self.known_characters.add(alias.upper())
 
     def extract_beats(
         self,
@@ -182,14 +217,29 @@ class BeatExtractor:
                 # Get evidence ID for character line
                 char_evidence = block_refs.get(i + 1, "")
 
+                # Try to resolve character entity using DialogueFormatter
+                speaker_match = self.dialogue_formatter.detect_speaker(line_stripped, None)
+
                 # Add character paragraph
                 char_paragraph = {
                     "type": "character",
                     "text": char_name + (extension if extension else ""),
                     "evidence_ids": [char_evidence] if char_evidence else []
                 }
+                char_paragraph["meta"] = {}
                 if extension:
-                    char_paragraph["meta"] = {"extension": extension.strip()}
+                    char_paragraph["meta"]["extension"] = extension.strip()
+
+                # Add character_id if we have a match
+                if speaker_match:
+                    char_paragraph["meta"]["character_id"] = speaker_match.entity.get("id", "")
+                    char_paragraph["meta"]["match_confidence"] = speaker_match.confidence
+                    char_paragraph["meta"]["match_type"] = speaker_match.match_type
+
+                # Only include meta if it has content
+                if not char_paragraph["meta"]:
+                    del char_paragraph["meta"]
+
                 paragraphs.append(char_paragraph)
 
                 # Collect dialogue lines
@@ -337,13 +387,29 @@ class BeatExtractor:
                 extension = char_match.group(2) if char_match.lastindex and char_match.lastindex >= 2 else ""
 
                 char_evidence = block_refs.get(line_num, "")
+
+                # Try to resolve character entity using DialogueFormatter
+                speaker_match = self.dialogue_formatter.detect_speaker(line_stripped, None)
+
                 char_paragraph = {
                     "type": "character",
                     "text": char_name + (extension if extension else ""),
                     "evidence_ids": [char_evidence] if char_evidence else []
                 }
+                char_paragraph["meta"] = {}
                 if extension:
-                    char_paragraph["meta"] = {"extension": extension.strip()}
+                    char_paragraph["meta"]["extension"] = extension.strip()
+
+                # Add character_id if we have a match
+                if speaker_match:
+                    char_paragraph["meta"]["character_id"] = speaker_match.entity.get("id", "")
+                    char_paragraph["meta"]["match_confidence"] = speaker_match.confidence
+                    char_paragraph["meta"]["match_type"] = speaker_match.match_type
+
+                # Only include meta if it has content
+                if not char_paragraph["meta"]:
+                    del char_paragraph["meta"]
+
                 paragraphs.append(char_paragraph)
 
                 # Collect dialogue and parentheticals

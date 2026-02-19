@@ -83,6 +83,12 @@ class ScriptBuilder:
             # Get known characters for dialogue detection
             character_names = self._get_character_names()
 
+            # Get character entities for dialogue resolution
+            character_entities = self._get_character_entities()
+
+            # Update BeatExtractor with character entities
+            self.beat_extractor.set_character_entities(character_entities)
+
             # Build ScriptGraph scenes
             scriptgraph_scenes = []
 
@@ -151,6 +157,16 @@ class ScriptBuilder:
         return [
             e.get("name", "")
             for e in self._storygraph.get("entities", [])
+            if e.get("type") == "character"
+        ]
+
+    def _get_character_entities(self) -> List[Dict]:
+        """Get all character entities from StoryGraph."""
+        if not self._storygraph:
+            return []
+
+        return [
+            e for e in self._storygraph.get("entities", [])
             if e.get("type") == "character"
         ]
 
