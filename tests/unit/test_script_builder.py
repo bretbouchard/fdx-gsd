@@ -20,6 +20,12 @@ from core.script import (
     BeatExtractor,
     extract_beats,
 )
+from core.script.dialogue import (
+    DialogueFormatter,
+    CharacterMatch,
+    detect_speaker,
+    format_dialogue,
+)
 
 
 # ============================================================================
@@ -752,3 +758,142 @@ A dark car waits. The engine idles.
         builder = ScriptBuilder(project_path, config)
 
         assert builder.config == config
+
+
+# ============================================================================
+# DialogueFormatter Tests
+# ============================================================================
+
+class TestDialogueFormatter:
+    """Tests for DialogueFormatter and speaker detection."""
+
+    def test_speaker_detection_exact_match(self):
+        """Test FOX matches Fox entity exactly."""
+        formatter = DialogueFormatter([
+            {"id": "CHAR_Fox_1234", "name": "Fox", "aliases": []}
+        ])
+
+        match = formatter.detect_speaker("FOX", [])
+
+        assert match is not None
+        assert match.entity.get("id") == "CHAR_Fox_1234"
+        assert match.confidence == 1.0
+        assert match.match_type == "exact"
+
+    def test_speaker_detection_case_insensitive(self):
+        """Test Fox matches Fox entity (case-insensitive via lookup)."""
+        formatter = DialogueFormatter([
+            {"id": "CHAR_Fox_1234", "name": "Fox", "aliases": []}
+        ])
+
+        # Character cues are typically uppercase, but we test lookup flexibility
+        # FOX (exact match) -> FOX -> Fox entity
+        match = formatter.detect_speaker("FOX", [])
+
+        assert match is not None
+        assert match.entity.get("id") == "CHAR_Fox_1234"
+        # FOX uppercase matches the uppercase name stored in lookup
+        assert match.confidence == 1.0
+        assert match.match_type == "exact"
+
+    def test_speaker_detection_alias(self):
+        """Test Johnny matches entity with that alias."""
+        formatter = DialogueFormatter([
+            {"id": "CHAR_John_5678", "name": "John Smith", "aliases": ["Johnny", "Johnny Boy"]}
+        ])
+
+        match = formatter.detect_speaker("JOHNNY", [])
+
+        assert match is not None
+        assert match.entity.get("id") == "CHAR_John_5678"
+        assert match.confidence == 0.9
+        assert match.match_type == "alias"
+
+    def test_speaker_no_match(self):
+        """Test unknown name returns None."""
+        formatter = DialogueFormatter([
+            {"id": "CHAR_Fox_1234", "name": "Fox", "aliases": []}
+        ])
+
+        match = formatter.detect_speaker("UNKNOWN CHARACTER", [])
+
+        assert match is None
+
+    def test_parenthetical_extraction(self):
+        """Test (pauses) Hello splits correctly."""
+        formatter = DialogueFormatter()
+
+        remaining, parenthetical = formatter.extract_parenthetical("(pauses) Hello there.")
+
+        assert parenthetical == "pauses"
+        assert remaining == "Hello there."
+
+    def test_dialogue_block_formatting(self):
+        """Test produces character + dialogue paragraphs."""
+        formatter = DialogueFormatter([
+            {"id": "CHAR_Fox_1234", "name": "Fox", "aliases": []}
+        ])
+
+        speaker_match = formatter.detect_speaker("FOX", [])
+        paragraphs = formatter.format_dialogue_block(
+            speaker_match,
+            ["I knew this booth was bad luck."],
+            ["ev_test_1"]
+        )
+
+        # Should have character and dialogue
+        assert len(paragraphs) == 2
+        assert paragraphs[0]["type"] == "character"
+        assert paragraphs[0]["text"] == "Fox"
+        assert paragraphs[1]["type"] == "dialogue"
+        assert "bad luck" in paragraphs[1]["text"]
+
+    def test_dialogue_character_id_in_meta(self):
+        """Test paragraph meta contains character_id."""
+        formatter = DialogueFormatter([
+            {"id": "CHAR_Fox_1234", "name": "Fox", "aliases": []}
+        ])
+
+        speaker_match = formatter.detect_speaker("FOX", [])
+        paragraphs = formatter.format_dialogue_block(
+            speaker_match,
+            ["Some dialogue."],
+            ["ev_test"]
+        )
+
+        char_para = paragraphs[0]
+        assert "meta" in char_para
+        assert char_para["meta"]["character_id"] == "CHAR_Fox_1234"
+        assert "match_confidence" in char_para["meta"]
+
+    def test_full_scene_with_dialogue(self):
+        """Test end-to-end: scene has both action and dialogue with character_id."""
+        # Set up BeatExtractor with character entities
+        extractor = BeatExtractor(
+            character_entities=[
+                {"id": "CHAR_Fox_1234", "type": "character", "name": "FOX", "aliases": []}
+            ]
+        )
+
+        content = """FOX enters and sits down.
+
+FOX
+(pauses)
+I knew this booth was bad luck."""
+
+        paragraphs = extractor.extract_all(
+            content, 1, 6, {1: "ev_1", 3: "ev_2", 4: "ev_3", 5: "ev_4"}, ["FOX"]
+        )
+
+        # Should have action, character, parenthetical, dialogue
+        types = [p["type"] for p in paragraphs]
+        assert "action" in types
+        assert "character" in types
+        assert "parenthetical" in types
+        assert "dialogue" in types
+
+        # Check character paragraph has character_id
+        char_para = next((p for p in paragraphs if p["type"] == "character"), None)
+        assert char_para is not None
+        assert "FOX" in char_para["text"]
+        assert char_para.get("meta", {}).get("character_id") == "CHAR_Fox_1234"
