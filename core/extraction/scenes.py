@@ -149,13 +149,17 @@ class SceneExtractor(BaseExtractor):
             slugline_match = SCENE_PATTERNS[0].pattern.search(line)
             if slugline_match:
                 self._scene_number += 1
+                # Groups: 1=INT/EXT, 2=location, 3=time
+                location = slugline_match.group(2).strip() if slugline_match.lastindex and slugline_match.lastindex >= 2 else None
+                time_of_day = slugline_match.group(3).strip() if slugline_match.lastindex and slugline_match.lastindex >= 3 else get_time_of_day(line)
+
                 boundaries.append(SceneBoundary(
                     line_number=i + 1,
                     scene_type="slugline",
                     slugline=slugline_match.group(0).strip(),
-                    location=slugline_match.group(2).strip() if slugline_match.lastindex >= 2 else None,
+                    location=location,
                     int_ext=get_int_ext(line),
-                    time_of_day=get_time_of_day(line),
+                    time_of_day=time_of_day,
                     confidence=0.95,
                     block_ref=block_ref,
                     context=context,

@@ -290,7 +290,7 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 # ============================================================================
-# PHASE 1-2: Build Commands (Stubs)
+# PHASE 1-2: Build Commands
 # ============================================================================
 
 def cmd_build(args: argparse.Namespace) -> int:
@@ -301,12 +301,55 @@ def cmd_build(args: argparse.Namespace) -> int:
       gsd build canon   # Extract canonical entities
       gsd build script  # Compose screenplay
     """
+    project_path = Path.cwd()
+    while not (project_path / "gsd.yaml").exists():
+        if project_path == project_path.parent:
+            print("Not in a GSD project.")
+            return 1
+        project_path = project_path.parent
+
+    config = load_config(project_path)
     what = args.what
 
     if what == "canon":
-        print("Building canon... (Phase 1 - coming soon)")
-        print("This will extract characters, locations, and scenes from inbox.")
-        return 0
+        from core.canon import build_canon
+
+        print("Building canon...")
+        print(f"Project: {config['project']['name']}")
+        print()
+
+        # Check for inbox files
+        inbox_files = list((project_path / "inbox").glob("*.md"))
+        if not inbox_files:
+            print("No inbox files found. Run 'gsd ingest' first.")
+            return 1
+
+        print(f"Processing {len(inbox_files)} inbox file(s)...")
+
+        # Run canon builder
+        result = build_canon(project_path, config)
+
+        # Report results
+        print()
+        print("=== Canon Build Results ===")
+        print(f"Characters: {result.characters_created} created, {result.characters_linked} linked")
+        print(f"Locations: {result.locations_created} created, {result.locations_linked} linked")
+        print(f"Scenes: {result.scenes_created} created")
+        print(f"Disambiguation items: {result.queue_items} queued")
+
+        if result.errors:
+            print()
+            print("Errors:")
+            for error in result.errors:
+                print(f"  • {error}")
+
+        print()
+        if result.queue_items > 0:
+            print(f"Next: gsd resolve  # Review {result.queue_items} disambiguation items")
+        else:
+            print("All entities resolved automatically.")
+
+        return 0 if result.success else 1
 
     elif what == "script":
         print("Building script... (Phase 2 - coming soon)")
@@ -352,8 +395,150 @@ def cmd_resolve(args: argparse.Namespace) -> int:
 
     Usage: gsd resolve
     """
-    print("Disambiguation resolution... (coming soon)")
+    project_path = Path.cwd()
+    while not (project_path / "gsd.yaml").exists():
+        if project_path == project_path.parent:
+            print("Not in a GSD project.")
+            return 1
+        project_path = project_path.parent
+
+    queue_path = project_path / "build" / "disambiguation_queue.json"
+
+    if not queue_path.exists():
+        print("No disambiguation queue found. Run 'gsd build canon' first.")
+        return 1
+
+    queue = json.loads(queue_path.read_text())
+    open_items = [i for i in queue.get("items", []) if i["status"] == "open"]
+
+    if not open_items:
+        print("No open disambiguation items.")
+        return 0
+
+    print(f"=== Disambiguation Queue ({len(open_items)} open items) ===\n")
+
+    for idx, item in enumerate(open_items, 1):
+        print(f"[{idx}/{len(open_items)}] {item['kind'].upper()}")
+        print(f"  {item['label']}")
+        print(f"  Context: {item.get('context_excerpt', 'N/A')[:100]}...")
+
+        # Show candidates if available
+        if item.get("candidates"):
+            print("  Candidates:")
+            for c_idx, candidate in enumerate(item["candidates"], 1):
+                print(f"    {c_idx}. {candidate['name']} (confidence: {candidate['confidence']:.0%})")
+
+        # Show recommended action
+        if item.get("recommended_action"):
+            print(f"  Recommended: {item['recommended_action']}")
+
+        print()
+
+        # Get user input
+        while True:
+            prompt = "Action? (a)ccept / (r)eject / (s)kip / (q)uit: "
+            response = input(prompt).strip().lower()
+
+            if response in ("a", "accept"):
+                # Accept recommended action
+                item["status"] = "resolved"
+                item["resolved_at"] = datetime.now().isoformat()
+                item["resolution"] = "accepted"
+
+                # Apply resolution
+                _apply_resolution(project_path, item)
+                print("  ✓ Accepted\n")
+                break
+
+            elif response in ("r", "reject"):
+                # Reject - create new entity
+                item["status"] = "resolved"
+                item["resolved_at"] = datetime.now().isoformat()
+                item["resolution"] = "rejected"
+
+                # Create new entity
+                _create_entity_from_queue(project_path, item)
+                print("  ✓ Created new entity\n")
+                break
+
+            elif response in ("s", "skip"):
+                print("  Skipped\n")
+                break
+
+            elif response in ("q", "quit"):
+                # Save progress and exit
+                queue_path.write_text(json.dumps(queue, indent=2))
+                print(f"\nProgress saved. {len([i for i in open_items if i['status'] == 'resolved'])} items resolved.")
+                return 0
+
+            else:
+                print("  Invalid option. Use a/r/s/q")
+
+    # Save queue
+    queue_path.write_text(json.dumps(queue, indent=2))
+
+    resolved_count = len([i for i in open_items if i.get("status") == "resolved"])
+    print(f"\n✓ Resolved {resolved_count} of {len(open_items)} items")
+
     return 0
+
+
+def _apply_resolution(project_path: Path, item: dict):
+    """Apply a disambiguation resolution."""
+    storygraph_path = project_path / "build" / "storygraph.json"
+    storygraph = json.loads(storygraph_path.read_text())
+
+    if item["recommended_action"] in ("merge", "link"):
+        # Add alias to existing entity
+        target_id = item.get("recommended_target")
+        mention = item.get("mention")
+
+        for entity in storygraph.get("entities", []):
+            if entity["id"] == target_id:
+                if mention not in entity.get("aliases", []):
+                    entity.setdefault("aliases", []).append(mention)
+                if item.get("evidence_ids"):
+                    entity.setdefault("evidence_ids", []).extend(item["evidence_ids"])
+                break
+
+    elif item["recommended_action"] == "create":
+        _create_entity_from_queue(project_path, item)
+
+    storygraph_path.write_text(json.dumps(storygraph, indent=2))
+
+
+def _create_entity_from_queue(project_path: Path, item: dict):
+    """Create a new entity from a queue item."""
+    import hashlib
+
+    storygraph_path = project_path / "build" / "storygraph.json"
+    storygraph = json.loads(storygraph_path.read_text())
+
+    # Generate ID
+    prefix_map = {"character": "CHAR", "location": "LOC"}
+    prefix = prefix_map.get(item.get("entity_type", "entity"), "ENT")
+    slug = item.get("mention", "unknown").replace(" ", "_")[:20]
+    hash_part = hashlib.md5(item.get("mention", "").encode()).hexdigest()[:8]
+    canonical_id = f"{prefix}_{slug}_{hash_part}"
+
+    # Check if exists
+    existing_ids = {e["id"] for e in storygraph.get("entities", [])}
+    if canonical_id in existing_ids:
+        return
+
+    # Create entity
+    entity = {
+        "id": canonical_id,
+        "type": item.get("entity_type", "entity"),
+        "name": item.get("mention", ""),
+        "aliases": [item.get("mention", "")],
+        "attributes": {},
+        "evidence_ids": item.get("evidence_ids", []),
+        "confidence": 0.5
+    }
+
+    storygraph["entities"].append(entity)
+    storygraph_path.write_text(json.dumps(storygraph, indent=2))
 
 
 def main() -> int:

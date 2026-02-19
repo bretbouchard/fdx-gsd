@@ -280,7 +280,9 @@ class TestPatternHelpers:
         """Test INT/EXT extraction."""
         assert get_int_ext("INT. DINER - NIGHT") == "INT"
         assert get_int_ext("EXT. STREET - DAY") == "EXT"
-        assert get_int_ext("INT./EXT. PORCH - DAY") == "INT./EXT"
+        # Both formats normalize to INT/EXT
+        assert get_int_ext("INT./EXT. PORCH - DAY") == "INT/EXT"
+        assert get_int_ext("I/E. CAR - NIGHT") == "INT/EXT"
         assert get_int_ext("No slugline") is None
 
 

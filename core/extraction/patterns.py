@@ -103,11 +103,11 @@ LOCATION_PATTERNS = [
 
 # Scene detection patterns
 SCENE_PATTERNS = [
-    # Standard slugline (also triggers scene boundary)
+    # Standard slugline (also triggers scene boundary) - captures INT/EXT, location, and time
     ExtractionPattern(
         name="scene_slugline",
         pattern=re.compile(
-            r'(INT\.?|EXT\.?|INT\./EXT\.?|I/E)\s*\.?\s*[A-Z][A-Za-z\s\-\']+?\s*-\s*(DAY|NIGHT|DAWN|DUSK|MORNING|AFTERNOON|EVENING|CONTINUOUS|LATER)',
+            r'(INT\.?|EXT\.?|INT\./EXT\.?|I/E)\s*\.?\s*([A-Z][A-Za-z\s\-\']+?)\s*-\s*(DAY|NIGHT|DAWN|DUSK|MORNING|AFTERNOON|EVENING|CONTINUOUS|LATER)',
             re.IGNORECASE
         ),
         entity_type="scene",
@@ -227,7 +227,7 @@ def get_int_ext(text: str) -> Optional[str]:
     """Extract INT/EXT from slugline text."""
     upper = text.upper()
     if 'INT./EXT' in upper or 'I/E' in upper:
-        return 'INT./EXT'
+        return 'INT/EXT'
     elif 'INT' in upper:
         return 'INT'
     elif 'EXT' in upper:
