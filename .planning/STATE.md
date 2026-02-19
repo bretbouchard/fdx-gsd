@@ -1,16 +1,16 @@
 # STATE: FDX GSD
 
 **Last Updated:** 2026-02-19
-**Session:** Phase 1 Complete
+**Session:** Phase 2 in Progress
 
 ---
 
 ## Current Position
 
 **Phase:** 2 of 8 (script-composition)
-**Plan:** Not started
-**Status:** Phase 1 complete, ready for Phase 2
-**Mood:** 🟢 Ready to plan
+**Plan:** 1 of 3 (02-01 complete)
+**Status:** In progress
+**Mood:** 🟢 Executing Phase 2
 
 **Progress:** █████░░░░░ 50% (Phase 0, 1, 7 complete)
 
@@ -20,6 +20,7 @@
 
 | When | What |
 |------|------|
+| 2026-02-19 | **Phase 2 Plan 01** - ScriptBuilder core with sluglines, beats, dialogue extraction |
 | 2026-02-19 | **Phase 1 COMPLETE** - All 4 plans executed across 3 waves |
 | 2026-02-19 | **Phase 1 Plan 04** - Disambiguation workflow with vault updates + audit trail |
 | 2026-02-19 | **Phase 1 Plan 03** - CLI polish + deterministic builds |
@@ -29,19 +30,24 @@
 | 2026-02-19 | Project structure created |
 | 2026-02-19 | Phase 0 CLI implemented (new-project, ingest, status) |
 | 2026-02-19 | FDX writer implemented |
-| 2026-02-19 | Test framework: 94 tests passing |
+| 2026-02-19 | Test framework: 120 tests passing (94 + 26 new) |
 
 ---
 
 ## Active Work
 
 ### Current Task
-Phase 1 (Canon Extraction) complete. Ready for Phase 2 (Script Composition).
+Phase 2 Plan 1 complete. Ready for Phase 2 Plan 2.
 
 ### Completed Phases
 - ✅ Phase 0: Foundation
 - ✅ Phase 1: Canon Extraction
 - ✅ Phase 7: Media Asset Archive (parallel track)
+
+### Phase 2 Progress
+- ✅ Plan 01: ScriptBuilder core (sluglines, beats, dialogue)
+- ⏳ Plan 02: Pending
+- ⏳ Plan 03: Pending
 
 ---
 
@@ -67,6 +73,12 @@ Phase 1 (Canon Extraction) complete. Ready for Phase 2 (Script Composition).
 8. CI validates tests, schemas, builds
 9. Deterministic builds (sorted JSON output)
 
+### Key Decisions Made (Phase 2 - Script Composition)
+1. ScriptBuilder follows CanonBuilder pattern for consistency
+2. All paragraphs require evidence_ids for traceability
+3. Slugline format: `{INT_EXT}. {LOCATION} - {TIME}` (uppercase)
+4. Scene ordering from line_number in StoryGraph entities
+
 ### Patterns to Remember
 - Every derived fact needs evidence link
 - Disambiguation queue prevents wrong merges
@@ -79,6 +91,7 @@ Phase 1 (Canon Extraction) complete. Ready for Phase 2 (Script Composition).
 - **Vault notes are written during canon build with evidence links**
 - **Evidence links resolve to full Obsidian wikilinks via evidence_index.json**
 - **Sort JSON output (entities by type/id, queue items by id, evidence_ids) for deterministic builds**
+- **ScriptBuilder pattern: load StoryGraph -> build scenes -> write ScriptGraph**
 
 ### Things to Avoid
 - Don't use bare names when canonical entities exist
@@ -112,8 +125,8 @@ Phase 1 (Canon Extraction) complete. Ready for Phase 2 (Script Composition).
 
 ## Next Actions
 
-1. **Plan Phase 2** - Script Composition with `/gsd:plan-phase 2`
-2. **Execute Phase 2** - Generate screenplay paragraphs + export .fdx
+1. **Execute Phase 2 Plan 2** - Continue Script Composition
+2. **Execute Phase 2 Plan 3** - Complete Script Composition
 
 ---
 
@@ -128,6 +141,7 @@ fdx_gsd/
 │   ├── STATE.md                ✅ (this file)
 │   └── phases/
 │       ├── 01-canon-extraction/ ✅ (4 plans complete)
+│       ├── 02-script-composition/ 🔄 (1 of 3 plans complete)
 │       └── 07-media-archive/    ✅ (7 plans complete)
 ├── .beads/                      ✅
 ├── .github/workflows/ci.yml     ✅
@@ -140,10 +154,11 @@ fdx_gsd/
 │   ├── vault/                   ✅ (VaultNoteWriter, templates)
 │   ├── archive/                 ✅ (media asset tracking)
 │   ├── storygraph/              ✅ (schema)
-│   └── scriptgraph/             ✅ (schema)
+│   ├── scriptgraph/             ✅ (schema)
+│   └── script/                  ✅ (ScriptBuilder, SluglineGenerator, BeatExtractor)
 ├── templates/project_template/  ✅
 ├── tests/
-│   ├── unit/                    ✅ (94 tests)
+│   ├── unit/                    ✅ (120 tests)
 │   ├── integration/             ✅
 │   └── fixtures/                ✅
 ├── docs/adr/                    ✅
