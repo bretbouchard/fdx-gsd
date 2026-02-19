@@ -7,9 +7,12 @@
 
 ## Current Position
 
-**Phase:** 0 Complete, Phase 1 Ready to Plan
-**Status:** All critical decisions resolved, ready for Phase 1 planning
-**Mood:** 🟢 Ready to execute
+**Phase:** 1 of 10 (canon-extraction)
+**Plan:** 02 of 4 complete
+**Status:** In progress - vault integration complete
+**Mood:** 🟢 Ready to continue
+
+**Progress:** ██░░░░░░░░ 20%
 
 ---
 
@@ -17,6 +20,8 @@
 
 | When | What |
 |------|------|
+| 2026-02-19 | **Phase 1 Plan 02: Vault Integration** - CanonBuilder with vault writing |
+| 2026-02-19 | **Phase 1 Plan 01: Note Templates** - VaultNoteWriter created |
 | 2026-02-19 | Project structure created |
 | 2026-02-19 | Phase 0 CLI implemented (new-project, ingest, status) |
 | 2026-02-19 | FDX writer implemented |
@@ -38,11 +43,11 @@
 ## Active Work
 
 ### Current Task
-All decisions resolved. Ready to plan Phase 1.
+Phase 1 Plan 02 complete - vault integration finished.
 
 ### Ready Work (from Beads)
-1. `fdx_gsd-2`: PHASE-1: Canon Extraction (ready to plan)
-2. `fdx_gsd-12`: INFRA: Confucius MCP Integration
+1. `fdx_gsd-2`: PHASE-1: Canon Extraction (in progress)
+2. Continue with Plan 03 or next phase
 
 ---
 
@@ -76,6 +81,8 @@ All decisions resolved. Ready to plan Phase 1.
 - Every session ends with bead update
 - **Always ask on ambiguity - never guess silently**
 - **All aliases link to ONE canonical UUID**
+- **Vault notes are written during canon build with evidence links**
+- **Evidence links resolve to full Obsidian wikilinks via evidence_index.json**
 
 ### Things to Avoid
 - Don't use bare names when canonical entities exist
@@ -139,9 +146,9 @@ All decisions resolved. Ready to plan Phase 1.
 
 ## Next Actions
 
-1. **Plan Phase 1** - Create detailed execution plan for canon extraction
-2. **Integrate Confucius MCP** - Set up pattern storage (fdx_gsd-12)
-3. **Execute Phase 1 requirements** - CAN-01 through CAN-06
+1. **Continue Phase 1** - Execute Plan 03 if exists, or proceed to next phase
+2. **Verify vault notes** - Run integration tests to confirm notes are created correctly
+3. **Update beads** - Mark completed work
 
 ---
 
