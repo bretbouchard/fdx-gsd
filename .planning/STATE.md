@@ -8,11 +8,11 @@
 ## Current Position
 
 **Phase:** 3 of 8 (round-trip-editing)
-**Plan:** 2 of 3 (03-02 complete)
-**Status:** In progress
-**Mood:** 🟢 Executing Phase 3
+**Plan:** 3 of 3 (03-03 complete)
+**Status:** Phase complete
+**Mood:** 🟢 Phase 3 Complete
 
-**Progress:** ██████░░░░ 56% (Phase 0, 1, 2, 7 complete; Phase 3 started)
+**Progress:** ███████░░░ 62% (Phase 0, 1, 2, 3, 7 complete)
 
 ---
 
@@ -20,6 +20,7 @@
 
 | When | What |
 |------|------|
+| 2026-02-19 | **Phase 3 Plan 03** - Vault reingestion pipeline (VaultReingester, ReingestResult, ParsedNote) |
 | 2026-02-19 | **Phase 3 Plan 02** - Three-tier conflict resolution (ConflictResolver, Conflict, ConflictTier, ConflictStatus) |
 | 2026-02-19 | **Phase 3 Plan 01** - Sync foundation module (change detection, protected blocks, provenance) |
 | 2026-02-19 | **Phase 2 COMPLETE** - All 3 plans executed |
@@ -35,18 +36,19 @@
 ## Active Work
 
 ### Current Task
-Phase 3 Plan 2 complete. Ready for Plan 3.
+Phase 3 COMPLETE. Ready for next phase.
 
 ### Completed Phases
 - ✅ Phase 0: Foundation
 - ✅ Phase 1: Canon Extraction
 - ✅ Phase 2: Script Composition
+- ✅ Phase 3: Round-Trip Editing
 - ✅ Phase 7: Media Asset Archive (parallel track)
 
 ### Phase 3 Progress
 - ✅ Plan 01: Sync foundation module (ChangeDetector, protected blocks, ProvenanceTracker)
 - ✅ Plan 02: Conflict resolution (ConflictResolver, three-tier classification)
-- ⬜ Plan 03: CLI integration for sync
+- ✅ Plan 03: Vault reingestion pipeline (VaultReingester, ReingestResult)
 
 ---
 
@@ -90,6 +92,9 @@ Phase 3 Plan 2 complete. Ready for Plan 3.
 5. Three-tier conflict classification: SAFE (auto-merge arrays), AMBIGUOUS (review scalars), CRITICAL (block identity changes)
 6. SAFE tier only applies to array additions (aliases, evidence_ids, tags)
 7. CRITICAL tier blocks operations on identity fields (entity_id, canonical_id, entity_type, name)
+8. VaultReingester coordinates full pipeline with dependency injection (ChangeDetector, ConflictResolver, ProvenanceTracker)
+9. ReingestResult captures comprehensive statistics for reporting
+10. Entity index provides O(1) lookups during merge operations
 
 ### Patterns to Remember
 - Every derived fact needs evidence link
@@ -107,6 +112,7 @@ Phase 3 Plan 2 complete. Ready for Plan 3.
 - **CLI command pattern: import builder -> check prerequisites -> run -> report results**
 - **Sync pattern: ChangeDetector baseline -> detect changes -> track in ProvenanceTracker**
 - **Conflict pattern: Detect conflict -> classify tier -> auto-merge SAFE / flag AMBIGUOUS / block CRITICAL**
+- **Reingest pattern: detect modified files -> parse vault notes -> merge with StoryGraph -> flag conflicts -> save**
 
 ### Things to Avoid
 - Don't use bare names when canonical entities exist
@@ -140,8 +146,8 @@ Phase 3 Plan 2 complete. Ready for Plan 3.
 
 ## Next Actions
 
-1. **Phase 3 Plan 2 COMPLETE** - Three-tier conflict resolution
-2. **Next:** Phase 3 Plan 3 - CLI integration for sync
+1. **Phase 3 COMPLETE** - Round-trip editing sync module
+2. **Next:** Phase 4 or continue with remaining phases
 
 ---
 
@@ -157,7 +163,7 @@ fdx_gsd/
 │   └── phases/
 │       ├── 01-canon-extraction/ ✅ (4 plans complete)
 │       ├── 02-script-composition/ ✅ (3 plans complete)
-│       ├── 03-round-trip-editing/ 🔄 (2 plans complete)
+│       ├── 03-round-trip-editing/ ✅ (3 plans complete)
 │       └── 07-media-archive/    ✅ (7 plans complete)
 ├── .beads/                      ✅
 ├── .github/workflows/ci.yml     ✅
@@ -172,7 +178,7 @@ fdx_gsd/
 │   ├── storygraph/              ✅ (schema)
 │   ├── scriptgraph/             ✅ (schema + validation utils)
 │   ├── script/                  ✅ (ScriptBuilder, SluglineGenerator, BeatExtractor, DialogueFormatter)
-│   └── sync/                    ✅ (ChangeDetector, protected_blocks, ProvenanceTracker, ConflictResolver)
+│   └── sync/                    ✅ (ChangeDetector, protected_blocks, ProvenanceTracker, ConflictResolver, VaultReingester)
 ├── templates/project_template/  ✅
 ├── tests/
 │   ├── unit/                    ✅ (120 tests)
