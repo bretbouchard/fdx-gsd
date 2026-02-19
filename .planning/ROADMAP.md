@@ -51,6 +51,7 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender
 
 **Duration:** TBD
 **Status:** 🚧 In Progress
+**Plans:** 4 plans in 3 waves
 
 ### Requirements
 - CAN-01: Character Extraction
@@ -60,19 +61,26 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender
 - CAN-05: Disambiguation Queue
 - CAN-06: Evidence Linking
 
-### Key Questions to Answer
-1. **NER Approach** - Library vs custom?
-2. **Confidence Threshold** - What's auto-accept vs queue?
-3. **Test Data** - Where do sample stories come from?
+### Key Decisions (LOCKED)
+- ADR-0002: NER Approach - Interactive Disambiguation (no ML)
+- ADR-0003: Fuzzy Matching - rapidfuzz
+- ADR-0004: Confidence Thresholds - Configurable per project
+- ADR-0005: Confucius Integration Architecture
 
 ### Deliverables
-- [ ] `gsd build canon` command
-- [ ] Character extraction pipeline
-- [ ] Location extraction pipeline
-- [ ] Scene detection heuristics
-- [ ] Alias resolution with fuzzy matching
-- [ ] Disambiguation queue system
-- [ ] `gsd resolve` interactive command
+- [x] `gsd build canon` command (partial - needs vault writing)
+- [x] Character extraction pipeline (core extraction module)
+- [x] Location extraction pipeline (core extraction module)
+- [x] Scene detection heuristics (core extraction module)
+- [x] Alias resolution with fuzzy matching (core resolution module)
+- [ ] Disambiguation queue system (needs vault integration)
+- [x] `gsd resolve` interactive command (partial - needs vault updates)
+
+### Plans
+- [ ] 01-01-PLAN.md — Vault note templates and writer
+- [ ] 01-02-PLAN.md — CanonBuilder vault integration
+- [ ] 01-03-PLAN.md — CLI polish and deterministic builds
+- [ ] 01-04-PLAN.md — Disambiguation workflow completion
 
 ### Exit Criteria
 - [ ] Ingest → Characters, Locations, Scenes in vault
@@ -224,14 +232,10 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 
 ---
 
-## Critical Path
+## Current Position
 
-```
-Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4
-            ▲
-            │
-            └── BLOCKED ON: NER approach decision
-```
+**Phase:** 1 (Canon Extraction) - Ready for execution
+**Next Action:** Execute Phase 1 plans with `/gsd:execute-phase 1`
 
 ---
 
@@ -245,46 +249,3 @@ Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4
 | 4 | False positives | Confidence thresholds, user tuning |
 | 5 | Over-complexity | Start with shot lists, defer spatial |
 | 6 | API instability | Minimal interface, version pinning |
-
----
-
-## Current Position
-
-**Phase:** 0 (Complete), moving to Phase 1
-**Next Action:** Answer Phase 1 key questions, then plan Phase 1
-
----
-
-## Questions Before Proceeding
-
-### MUST ANSWER for Phase 1:
-
-1. **NER Library Choice**
-   - Option A: spaCy (fast, good docs, rule-based fallback)
-   - Option B: transformers/HuggingFace (accurate, slower, heavier)
-   - Option C: Custom regex + rules (lightweight, story-specific)
-   - **Recommendation needed**
-
-2. **Test Data Source**
-   - Create synthetic test stories?
-   - Use public domain scripts?
-   - Use existing personal notes?
-   - **Need: 3-5 test stories for validation**
-
-3. **Confidence Threshold**
-   - Auto-accept at 0.85?
-   - Auto-reject below 0.5?
-   - Queue between 0.5-0.85?
-   - **Configurable or hardcoded?**
-
-4. **Fuzzy Matching Library**
-   - rapidfuzz? (fast)
-   - thefuzz? (simple)
-   - custom Levenshtein?
-   - **Need recommendation**
-
-5. **Confucius MCP Integration**
-   - Use existing Confucius MCP for pattern memory?
-   - Separate "Confucius" orchestration agent?
-   - How do they interact?
-   - **Architecture decision needed**
