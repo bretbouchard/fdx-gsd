@@ -116,6 +116,69 @@ LOCATION_PATTERNS = [
     ),
 ]
 
+# Location description patterns (for extracting details about locations)
+LOCATION_DESCRIPTION_PATTERNS = [
+    # Room features (e.g., "a large room with", "small office containing")
+    ExtractionPattern(
+        name="room_feature",
+        pattern=re.compile(
+            r'\b(a|the)\s+(large|small|dimly lit|bright|spacious|cramped|empty|crowded)\s+(room|office|chamber|hall|space)\b',
+            re.IGNORECASE
+        ),
+        entity_type="location_detail",
+        confidence_base=0.8,
+        description="Room size and lighting descriptions"
+    ),
+
+    # Furniture/fixtures (e.g., "a desk sits", "chairs are arranged")
+    ExtractionPattern(
+        name="furniture",
+        pattern=re.compile(
+            r'\b(a|the)\s+(desk|table|chair|counter|bar|bed|couch|sofa|shelf|bookcase|cabinet)\s+(sits|stands|is|are)\b',
+            re.IGNORECASE
+        ),
+        entity_type="location_detail",
+        confidence_base=0.75,
+        description="Furniture and fixture mentions"
+    ),
+
+    # Building type (e.g., "apartment building", "office tower")
+    ExtractionPattern(
+        name="building_type",
+        pattern=re.compile(
+            r'\b(apartment|office|warehouse|factory|house|home|mansion|cabin|hotel|motel|diner|restaurant|bar|pub|club|store|shop|church|school|hospital|prison|jail)\b',
+            re.IGNORECASE
+        ),
+        entity_type="location_detail",
+        confidence_base=0.85,
+        description="Building type indicators"
+    ),
+
+    # Outdoor features (e.g., "tree-lined street", "gravel path")
+    ExtractionPattern(
+        name="outdoor_feature",
+        pattern=re.compile(
+            r'\b(tree-lined|gravel|paved|dirt|narrow|wide|busy|quiet|deserted)\s+(street|road|path|alley|driveway|lane)\b',
+            re.IGNORECASE
+        ),
+        entity_type="location_detail",
+        confidence_base=0.8,
+        description="Outdoor location descriptions"
+    ),
+
+    # Connected spaces (e.g., "leads to", "opens into", "adjacent to")
+    ExtractionPattern(
+        name="connection",
+        pattern=re.compile(
+            r'\b(leads to|opens into|opens onto|connects to|adjacent to|next to|beside)\s+(the\s+)?([a-z]+(?:\s+[a-z]+)?)\b',
+            re.IGNORECASE
+        ),
+        entity_type="location_connection",
+        confidence_base=0.7,
+        description="Location connection references"
+    ),
+]
+
 
 # Scene detection patterns
 SCENE_PATTERNS = [

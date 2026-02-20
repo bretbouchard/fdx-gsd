@@ -62,7 +62,62 @@
         "attributes": {
           "type": "object",
           "additionalProperties": true,
-          "description": "Type-specific attributes"
+          "description": "Type-specific attributes",
+          "allOf": [
+            {
+              "if": {
+                "properties": { "type": { "const": "location" } },
+                "required": ["type"]
+              },
+              "then": {
+                "properties": {
+                  "int_ext": {
+                    "type": "string",
+                    "enum": ["INT", "EXT", "INT/EXT"],
+                    "description": "Interior, exterior, or both"
+                  },
+                  "time_of_day": {
+                    "type": "string",
+                    "enum": ["DAY", "NIGHT", "DAWN", "DUSK", "MORNING", "AFTERNOON", "EVENING", "CONTINUOUS", "LATER"],
+                    "description": "Primary time of day for this location"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Location description extracted from text"
+                  },
+                  "building_type": {
+                    "type": "string",
+                    "description": "Type of building (diner, office, apartment, etc.)"
+                  },
+                  "props": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Props commonly found at this location (PROP_ IDs)"
+                  },
+                  "characters": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Characters seen at this location (CHAR_ IDs)"
+                  },
+                  "connected_locations": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Locations connected to this one (LOC_ IDs)"
+                  },
+                  "scenes": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Scenes that occur at this location (SCN_ IDs)"
+                  },
+                  "features": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Notable features (furniture, layout elements)"
+                  }
+                }
+              }
+            }
+          ]
         },
         "evidence_ids": {
           "type": "array",
@@ -111,7 +166,9 @@
             "learns_fact",
             "tells_fact",
             "discovers_fact",
-            "overhears_fact"
+            "overhears_fact",
+            "located_at",
+            "connected_to"
           ],
           "description": "Edge/relationship type"
         },

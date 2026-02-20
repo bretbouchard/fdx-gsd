@@ -79,6 +79,17 @@ def render_location_template(entity: Dict[str, Any], evidence_links: str) -> str
     attrs = entity.get("attributes", {})
     int_ext = attrs.get("int_ext", "INT")
     time_of_day = attrs.get("time_of_day", "")
+    description = attrs.get("description", "")
+    props = attrs.get("props", [])
+    characters = attrs.get("characters", [])
+    connected_locations = attrs.get("connected_locations", [])
+    scenes = attrs.get("scenes", [])
+
+    # Format lists
+    props_str = chr(10).join(f"- [[{p}]]" for p in props) if props else "*None documented*"
+    chars_str = chr(10).join(f"- [[{c}]]" for c in characters) if characters else "*None documented*"
+    connected_str = chr(10).join(f"- [[{loc}]]" for loc in connected_locations) if connected_locations else "*None documented*"
+    scenes_str = chr(10).join(f"- [[{s}]]" for s in scenes) if scenes else "*None documented*"
 
     return f"""---
 id: {entity.get('id', 'unknown')}
@@ -86,6 +97,7 @@ name: {entity.get('name', 'Unknown Location')}
 type: location
 int_ext: {int_ext}
 time_of_day: {time_of_day}
+aliases: [{", ".join(repr(a) for a in entity.get("aliases", []))}]
 created_at: {now}
 ---
 
@@ -98,7 +110,23 @@ created_at: {now}
 
 ## Description
 
-*To be documented*
+{description if description else '*To be documented*'}
+
+## Props & Objects
+
+{props_str}
+
+## Characters Seen Here
+
+{chars_str}
+
+## Connected Locations
+
+{connected_str}
+
+## Scenes
+
+{scenes_str}
 
 ## Evidence
 
@@ -108,6 +136,10 @@ created_at: {now}
 ## Notes
 
 *Add your notes here...*
+
+## Sketch / Floor Plan
+
+*Add location diagram or reference image here...*
 """
 
 
@@ -192,6 +224,7 @@ name: ${name}
 type: location
 int_ext: ${int_ext}
 time_of_day: ${time_of_day}
+aliases: ${aliases}
 created_at: ${created_at}
 ---
 
@@ -204,7 +237,23 @@ created_at: ${created_at}
 
 ## Description
 
-*To be documented*
+${description}
+
+## Props & Objects
+
+${props}
+
+## Characters Seen Here
+
+${characters}
+
+## Connected Locations
+
+${connected_locations}
+
+## Scenes
+
+${scenes}
 
 ## Evidence
 
@@ -214,6 +263,10 @@ ${evidence_links}
 ## Notes
 
 *Add your notes here...*
+
+## Sketch / Floor Plan
+
+*Add location diagram or reference image here...*
 """
 
 SCENE_TEMPLATE = """---
