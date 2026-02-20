@@ -223,8 +223,24 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     elif args.files:
         # File input
         for file_pattern in args.files:
-            for source_file in Path.cwd().glob(file_pattern):
-                if source_file.suffix == '.md':
+            source_path = Path(file_pattern)
+
+            # Handle absolute paths vs relative paths with glob patterns
+            if source_path.is_absolute():
+                # Absolute path - check if it's a file or use parent for glob
+                if source_path.exists() and source_path.is_file():
+                    files_to_process = [source_path]
+                elif '*' in file_pattern:
+                    # Glob pattern with absolute path
+                    files_to_process = list(Path(file_pattern).parent.glob(Path(file_pattern).name))
+                else:
+                    files_to_process = []
+            else:
+                # Relative path - use current working directory for glob
+                files_to_process = list(Path.cwd().glob(file_pattern))
+
+            for source_file in files_to_process:
+                if source_file.suffix == '.md' and source_file.is_file():
                     # Copy markdown files
                     content = source_file.read_text()
                     dest_file = inbox_dir / f"{timestamp}_{source_file.name}"
