@@ -302,18 +302,62 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 
 **Duration:** TBD
 **Depends On:** Phase 5
+**Plans:** 4 plans in 4 waves
 
 ### Requirements
 - INT-01: Layout Brief Generation
 
+### Scope Decision
+**IN SCOPE:**
+- Layout Brief Generation (core/layout/ module)
+- LayoutBrief, SceneLayout, CameraSetup, CharacterPosition models
+- Camera position calculation from shot types
+- CLI command `gsd generate-layout`
+- JSON export to blender/<scene_id>/layout_brief.json
+- Unit and integration tests
+
+**OUT OF SCOPE (deferred):**
+- Blender addon implementation (requires bpy, different distribution)
+- Actual 3D scene rendering
+- Location asset library
+- Complex blocking analysis from action descriptions
+
+### Key Decisions
+- No new dependencies - Python stdlib only (json, dataclasses, math)
+- LayoutBriefGenerator follows ShotSuggester pattern
+- Camera position calculation based on cinematography standards
+- Deterministic JSON output with sorted lists
+- Layout brief format is the integration point for Blender_GSD (external)
+
 ### Deliverables
-- [ ] blender/<scene_id>/layout_brief.json
-- [ ] Blender addon or CLI runner
-- [ ] Scene scaffold generation
+- [ ] `gsd generate-layout` command
+- [ ] core/layout/ module (models, camera_math, generator, exporter)
+- [ ] blender/<scene_id>/layout_brief.json per scene
+- [ ] build/layout_brief.json (combined)
+- [ ] Unit and integration tests
+
+### Plans
+- [ ] 06-01-PLAN.md — Layout models and camera math (Wave 1)
+- [ ] 06-02-PLAN.md — LayoutBriefGenerator (Wave 2)
+- [ ] 06-03-PLAN.md — CLI integration + JSON export (Wave 3)
+- [ ] 06-04-PLAN.md — Tests (Wave 4)
+
+### Camera Distance Standards
+- WS: 5.0m (establishing, full body + environment)
+- MS: 2.5m (waist up, standard dialogue)
+- MCU: 1.8m (chest up, intimate dialogue)
+- CU: 1.2m (face only, emotional moments)
+- ECU: 0.8m (single feature)
+- INSERT: 0.5m (props, objects)
+- OTS: 2.0m (over-the-shoulder)
+- POV: 1.7m (eye height)
+- TWO: 3.0m (two characters in frame)
 
 ### Exit Criteria
-- [ ] Layout briefs generated
-- [ ] Blender_GSD can consume briefs
+- [ ] Layout briefs generated to blender/<scene_id>/layout_brief.json
+- [ ] Camera positions calculated from shot types
+- [ ] Evidence IDs propagated from ScriptGraph/ShotGraph
+- [ ] Layout brief JSON schema valid for Blender_GSD consumption
 
 ---
 
@@ -420,6 +464,6 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 
 ## Current Position
 
-**Phase:** 6 (Blender Integration) - Ready for planning
+**Phase:** 6 (Blender Integration) - Ready for execution
 **Completed:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 7
-**Next Action:** Plan Phase 6 with `/gsd:plan-phase 6`
+**Next Action:** Execute Phase 6 with `/gsd:execute-phase 6`
