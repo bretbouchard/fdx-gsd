@@ -190,29 +190,49 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 **Goal:** Production-grade memory + issue flagging
 
 **Duration:** TBD
+**Status:** 📋 Ready to execute
+**Plans:** 6 plans in 3 waves
 **Depends On:** Phase 3
 
 ### Requirements
-- VAL-01: Wardrobe Continuity
-- VAL-02: Prop Continuity
-- VAL-03: Timeline Validation
-- VAL-04: Knowledge Validation
+- VAL-01: Wardrobe Continuity (WARD-01/02/03 rules)
+- VAL-02: Prop Continuity (PROP-01/02/03 rules)
+- VAL-03: Timeline Validation (TIME-01/02/04 rules)
+- VAL-04: Knowledge Validation (KNOW-01/02/03/04 rules)
 - VAL-05: Issue Reporting
+
+### Key Decisions
+- No new dependencies - uses existing Python stdlib + rapidfuzz
+- Extend Phase 3 three-tier pattern (SAFE/AMBIGUOUS/CRITICAL) to IssueSeverity (info/warning/error)
+- Four specialized validators extending BaseValidator
+- Obsidian-compatible reports with wikilinks in vault/80_Reports/
+- Rule-based, deterministic validation (no ML)
 
 ### Deliverables
 - [ ] `gsd validate` command
-- [ ] `gsd report issues` command
-- [ ] Wardrobe validator
-- [ ] Props validator
-- [ ] Timeline validator
-- [ ] Knowledge validator
+- [ ] ValidationOrchestrator coordinating all validators
+- [ ] WardrobeValidator (WARD-01/02/03)
+- [ ] PropsValidator (PROP-01/02/03)
+- [ ] TimelineValidator (TIME-01/02/04)
+- [ ] KnowledgeValidator (KNOW-01/02/03/04)
+- [ ] ReportGenerator for markdown reports
 - [ ] Markdown reports in vault/80_Reports/
-- [ ] build/issues.json
+- [ ] build/issues.json (deterministic output)
+- [ ] Unit and integration tests
+
+### Plans
+- [ ] 04-01-PLAN.md — Issue model + BaseValidator + ReportGenerator (Wave 1)
+- [ ] 04-02-PLAN.md — WardrobeValidator (Wave 2)
+- [ ] 04-03-PLAN.md — PropsValidator (Wave 2)
+- [ ] 04-04-PLAN.md — TimelineValidator (Wave 2)
+- [ ] 04-05-PLAN.md — KnowledgeValidator (Wave 2)
+- [ ] 04-06-PLAN.md — CLI integration + ValidationOrchestrator + tests (Wave 3)
 
 ### Exit Criteria
 - [ ] Continuity issues detected
 - [ ] Knowledge leaks caught
 - [ ] Reports readable in Obsidian
+- [ ] `gsd validate` returns non-zero on errors (CI-friendly)
 
 ---
 
@@ -405,6 +425,6 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 
 ## Current Position
 
-**Phase:** 4 (Validation) - Ready for planning
+**Phase:** 4 (Validation) - Ready for execution
 **Completed:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 7
-**Next Action:** Plan Phase 4 with `/gsd:plan-phase 4`
+**Next Action:** Execute Phase 4 with `/gsd:execute-phase 4`
