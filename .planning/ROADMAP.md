@@ -11,7 +11,7 @@
 ```
 Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4 ──► Phase 5 ──► Phase 6 ──► Phase 7
 Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender     Archive
-   ✅           ✅          ✅          ✅          📋         📋         📋           ✅
+   ✅           ✅          ✅          ✅          ✅         📋         📋           ✅
                                      │
                                      └──► Phase 7 (parallel track for media archive)
 ```
@@ -185,16 +185,16 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 
 ---
 
-## Phase 4: Validation 📋 PLANNED
+## Phase 4: Validation ✅ COMPLETE
 
 **Goal:** Production-grade memory + issue flagging
 
-**Duration:** TBD
-**Status:** 📋 Ready to execute
-**Plans:** 6 plans in 3 waves
+**Duration:** Complete (2026-02-19)
+**Status:** ✅ Complete
+**Plans:** 6 plans in 3 waves (all executed)
 **Depends On:** Phase 3
 
-### Requirements
+### Requirements Delivered
 - VAL-01: Wardrobe Continuity (WARD-01/02/03 rules)
 - VAL-02: Prop Continuity (PROP-01/02/03 rules)
 - VAL-03: Timeline Validation (TIME-01/02/04 rules)
@@ -209,53 +209,90 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 - Rule-based, deterministic validation (no ML)
 
 ### Deliverables
-- [ ] `gsd validate` command
-- [ ] ValidationOrchestrator coordinating all validators
-- [ ] WardrobeValidator (WARD-01/02/03)
-- [ ] PropsValidator (PROP-01/02/03)
-- [ ] TimelineValidator (TIME-01/02/04)
-- [ ] KnowledgeValidator (KNOW-01/02/03/04)
-- [ ] ReportGenerator for markdown reports
-- [ ] Markdown reports in vault/80_Reports/
-- [ ] build/issues.json (deterministic output)
-- [ ] Unit and integration tests
+- [x] `gsd validate` command
+- [x] ValidationOrchestrator coordinating all validators
+- [x] WardrobeValidator (WARD-01/02/03)
+- [x] PropsValidator (PROP-01/02/03)
+- [x] TimelineValidator (TIME-01/02/04)
+- [x] KnowledgeValidator (KNOW-01/02/03/04)
+- [x] ReportGenerator for markdown reports
+- [x] Markdown reports in vault/80_Reports/
+- [x] build/issues.json (deterministic output)
+- [x] Unit and integration tests (55 new tests)
 
 ### Plans
-- [ ] 04-01-PLAN.md — Issue model + BaseValidator + ReportGenerator (Wave 1)
-- [ ] 04-02-PLAN.md — WardrobeValidator (Wave 2)
-- [ ] 04-03-PLAN.md — PropsValidator (Wave 2)
-- [ ] 04-04-PLAN.md — TimelineValidator (Wave 2)
-- [ ] 04-05-PLAN.md — KnowledgeValidator (Wave 2)
-- [ ] 04-06-PLAN.md — CLI integration + ValidationOrchestrator + tests (Wave 3)
+- [x] 04-01-PLAN.md — Issue model + BaseValidator + ReportGenerator (Wave 1)
+- [x] 04-02-PLAN.md — WardrobeValidator (Wave 2)
+- [x] 04-03-PLAN.md — PropsValidator (Wave 2)
+- [x] 04-04-PLAN.md — TimelineValidator (Wave 2)
+- [x] 04-05-PLAN.md — KnowledgeValidator (Wave 2)
+- [x] 04-06-PLAN.md — CLI integration + ValidationOrchestrator + tests (Wave 3)
 
 ### Exit Criteria
-- [ ] Continuity issues detected
-- [ ] Knowledge leaks caught
-- [ ] Reports readable in Obsidian
-- [ ] `gsd validate` returns non-zero on errors (CI-friendly)
+- [x] Continuity issues detected
+- [x] Knowledge leaks caught
+- [x] Reports readable in Obsidian
+- [x] `gsd validate` returns non-zero on errors (CI-friendly)
 
 ---
 
 ## Phase 5: Shot Layer 📋 PLANNED
 
-**Goal:** "Adjust shots, layouts as needed"
+**Goal:** Shot lists exportable, blocking notes coherent
 
 **Duration:** TBD
+**Status:** 📋 Ready to execute
+**Plans:** 5 plans in 5 waves
 **Depends On:** Phase 4
 
 ### Requirements
 - SCR-05: Shot Detection
 - SCR-06: Shot List Export
 
+### Key Decisions
+- No new dependencies - Python stdlib only (csv, re, dataclasses)
+- ShotSuggester follows BaseValidator pattern
+- Rule-based shot detection (no ML) - infer from dialogue/action
+- Export both CSV (StudioBinder-compatible) and JSON formats
+- Simple text blocking notes (coordinates deferred to Phase 6)
+- Auto-populate Shot List section in scene vault notes
+
 ### Deliverables
-- [ ] Shot suggestion engine
-- [ ] Shot notes in scenes
-- [ ] exports/shotlist.csv
-- [ ] Spatial constraint system
+- [ ] `gsd suggest-shots` command
+- [ ] ShotSuggester orchestrator (follows BaseValidator pattern)
+- [ ] ShotDetector with heuristic rules
+- [ ] ShotListExporter for CSV/JSON
+- [ ] core/shots/ module (types, models, detector, exporter, suggester)
+- [ ] exports/shotlist.csv (StudioBinder-compatible)
+- [ ] build/shotgraph.json
+- [ ] Updated SCN_Template.md with Shot List section
+- [ ] Unit and integration tests
+
+### Plans
+- [ ] 05-01-PLAN.md — Shot types and models (Wave 1)
+- [ ] 05-02-PLAN.md — ShotDetector + ShotListExporter (Wave 2)
+- [ ] 05-03-PLAN.md — ShotSuggester orchestrator (Wave 3)
+- [ ] 05-04-PLAN.md — CLI integration + vault template (Wave 4)
+- [ ] 05-05-PLAN.md — Tests (Wave 5)
+
+### Shot Types
+- WS (Wide Shot), MS (Medium Shot), MCU (Medium Close-Up)
+- CU (Close-Up), ECU (Extreme Close-Up)
+- INSERT, OTS (Over-the-shoulder), POV, TWO
+
+### Detection Rules
+- Establishing: Always first shot of scene (P0)
+- Emotional dialogue: Keywords -> CU (P1)
+- Movement: Action verbs -> MS (P1)
+- Detail insert: Object mentions -> INSERT (P2)
+- Two-character dialogue -> OTS (P2)
+- POV phrases -> POV (P3)
 
 ### Exit Criteria
-- [ ] Shot lists exportable
-- [ ] Blocking notes coherent
+- [ ] Shot lists exportable to CSV
+- [ ] Shot lists exportable to JSON
+- [ ] Blocking notes in scene metadata
+- [ ] `gsd suggest-shots` generates shots from scriptgraph
 
 ---
 
@@ -280,16 +317,16 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 
 ---
 
-## Phase 7: Media Asset Archive System 📋 PLANNED
+## Phase 7: Media Asset Archive System ✅ COMPLETE
 
 **Goal:** Archive and track all media realizations with Git LFS
 
-**Duration:** TBD
-**Status:** 📋 Ready to execute
-**Plans:** 7 plans in 5 waves
+**Duration:** Complete (2026-02-19)
+**Status:** ✅ Complete
+**Plans:** 7 plans in 5 waves (all executed)
 **Depends On:** Phase 0 (can run parallel with Phase 1-6)
 
-### Requirements
+### Requirements Delivered
 - ARC-01: Song/Work Registration
 - ARC-02: Realization Tracking
 - ARC-03: Performance Archive
@@ -323,75 +360,33 @@ Work (Song/Composition)
 - Cross-reference all aliases to canonical IDs
 
 ### Deliverables
-- [ ] `gsd archive init` - Initialize archive repository
-- [ ] `gsd archive register` - Register new work with aliases
-- [ ] `gsd archive realize` - Add a realization of a work
-- [ ] `gsd archive perform` - Archive a performance
-- [ ] `gsd archive status` - Show archive contents
-- [ ] Git LFS configuration for binary files
-- [ ] Private repository templates (GitHub/GitLab)
-- [ ] Media metadata schemas (JSON)
-- [ ] Alias resolution and search
+- [x] `gsd archive init` - Initialize archive repository
+- [x] `gsd archive register` - Register new work with aliases
+- [x] `gsd archive realize` - Add a realization of a work
+- [x] `gsd archive perform` - Archive a performance
+- [x] `gsd archive status` - Show archive contents
+- [x] Git LFS configuration for binary files
+- [x] Private repository templates (GitHub/GitLab)
+- [x] Media metadata schemas (JSON)
+- [x] Alias resolution and search
 
 ### Plans
-- [ ] 07-01-PLAN.md — Git LFS setup + archive models
-- [ ] 07-02-PLAN.md — Alias management system
-- [ ] 07-03-PLAN.md — Archive init command
-- [ ] 07-04-PLAN.md — Work registration
-- [ ] 07-05-PLAN.md — Realization tracking
-- [ ] 07-06-PLAN.md — Performance archive
-- [ ] 07-07-PLAN.md — Archive status + verification
-
-### Directory Structure
-```
-archive/
-├── works/
-│   └── {work_id}/
-│       ├── metadata.json          # Title, aliases, created, genre
-│       ├── realizations/
-│       │   └── {realization_id}/
-│       │       ├── metadata.json  # Version, date, studio, engineer
-│       │       ├── sessions/      # DAW projects (.als, .flp, .ptx)
-│       │       ├── stems/         # Individual tracks
-│       │       └── masters/       # Final outputs
-│       ├── performances/
-│       │   └── {performance_id}/
-│       │       ├── metadata.json  # Date, venue, personnel
-│       │       ├── audio/
-│       │       └── video/
-│       └── assets/
-│           ├── artwork/
-│           ├── graphics/
-│           └── docs/
-├── aliases.json                   # Global alias → canonical_id map
-└── index.json                     # Searchable index of all works
-```
-
-### Git LFS Configuration
-```yaml
-# .gitattributes
-*.wav filter=lfs diff=lfs merge=lfs -text
-*.flac filter=lfs diff=lfs merge=lfs -text
-*.mp3 filter=lfs diff=lfs merge=lfs -text
-*.aiff filter=lfs diff=lfs merge=lfs -text
-*.mp4 filter=lfs diff=lfs merge=lfs -text
-*.mov filter=lfs diff=lfs merge=lfs -text
-*.png filter=lfs diff=lfs merge=lfs -text
-*.jpg filter=lfs diff=lfs merge=lfs -text
-*.psd filter=lfs diff=lfs merge=lfs -text
-*.ai filter=lfs diff=lfs merge=lfs -text
-*.als filter=lfs diff=lfs merge=lfs -text
-*.flp filter=lfs diff=lfs merge=lfs -text
-```
+- [x] 07-01-PLAN.md — Git LFS setup + archive models
+- [x] 07-02-PLAN.md — Alias management system
+- [x] 07-03-PLAN.md — Archive init command
+- [x] 07-04-PLAN.md — Work registration
+- [x] 07-05-PLAN.md — Realization tracking
+- [x] 07-06-PLAN.md — Performance archive
+- [x] 07-07-PLAN.md — Archive status + verification
 
 ### Exit Criteria
-- [ ] Can create private archive repository
-- [ ] Can register works with multiple aliases
-- [ ] Can add realizations with full session files
-- [ ] Can add performances with audio/video
-- [ ] Git LFS handles all binary files
-- [ ] Alias search finds correct work
-- [ ] Archive status shows complete hierarchy
+- [x] Can create private archive repository
+- [x] Can register works with multiple aliases
+- [x] Can add realizations with full session files
+- [x] Can add performances with audio/video
+- [x] Git LFS handles all binary files
+- [x] Alias search finds correct work
+- [x] Archive status shows complete hierarchy
 
 ---
 
@@ -425,6 +420,6 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 
 ## Current Position
 
-**Phase:** 4 (Validation) - Ready for execution
-**Completed:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 7
-**Next Action:** Execute Phase 4 with `/gsd:execute-phase 4`
+**Phase:** 5 (Shot Layer) - Ready for execution
+**Completed:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 7
+**Next Action:** Execute Phase 5 with `/gsd:execute-phase 5`
