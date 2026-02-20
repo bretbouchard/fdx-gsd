@@ -655,6 +655,68 @@ def cmd_suggest_shots(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_generate_layout(args: argparse.Namespace) -> int:
+    """
+    Generate layout briefs from ScriptGraph + ShotGraph.
+
+    Creates Blender-compatible JSON files for scene previz.
+
+    Usage: gsd generate-layout
+    """
+    project_path, exit_code = find_project_root()
+    if exit_code != 0:
+        print("Error: Not in a GSD project.", file=sys.stderr)
+        return exit_code
+
+    build_path = project_path / "build"
+
+    # Check prerequisites
+    scriptgraph_path = build_path / "scriptgraph.json"
+    if not scriptgraph_path.exists():
+        print("Error: No scriptgraph.json found. Run 'gsd build script' first.")
+        return 1
+
+    shotgraph_path = build_path / "shotgraph.json"
+    if not shotgraph_path.exists():
+        print("Error: No shotgraph.json found. Run 'gsd suggest-shots' first.")
+        return 1
+
+    print("Generating layout briefs...")
+    print()
+
+    from core.layout import LayoutBriefGenerator, LayoutBriefExporter
+
+    # Run generator
+    generator = LayoutBriefGenerator(build_path)
+    try:
+        brief = generator.generate()
+    except ValueError as e:
+        print(f"Error: {e}")
+        return 1
+
+    # Export
+    exporter = LayoutBriefExporter(project_path)
+    paths = exporter.export(brief)
+
+    # Print results
+    print("=== Layout Generation Results ===")
+    print(f"Scenes processed: {len(brief.scene_layouts)}")
+    print()
+
+    for scene_layout in brief.scene_layouts:
+        print(f"  {scene_layout.scene_id}:")
+        print(f"    Cameras: {len(scene_layout.camera_setups)}")
+        print(f"    Characters: {len(scene_layout.characters)}")
+        print(f"    Output: blender/{scene_layout.scene_id}/layout_brief.json")
+
+    print()
+    print("Combined brief: build/layout_brief.json")
+    print()
+    print("\033[92mLayout briefs generated\033[0m")
+
+    return 0
+
+
 def cmd_validate(args: argparse.Namespace) -> int:
     """
     Validate story continuity.
@@ -1400,6 +1462,10 @@ def main() -> int:
     # suggest-shots
     p_shots = subparsers.add_parser("suggest-shots", help="Generate shot suggestions")
     p_shots.set_defaults(func=cmd_suggest_shots)
+
+    # generate-layout
+    p_layout = subparsers.add_parser("generate-layout", help="Generate Blender layout briefs")
+    p_layout.set_defaults(func=cmd_generate_layout)
 
     # archive
     p_archive = subparsers.add_parser("archive", help="Media archive commands")

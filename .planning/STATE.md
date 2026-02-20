@@ -1,18 +1,18 @@
 # STATE: FDX GSD
 
 **Last Updated:** 2026-02-19
-**Session:** Phase 3 COMPLETE
+**Session:** Phase 4 COMPLETE
 
 ---
 
 ## Current Position
 
-**Phase:** 3 of 8 (round-trip-editing)
-**Plan:** 5 of 5 (03-05 complete)
+**Phase:** 4 of 8 (validation) - COMPLETE
+**Plan:** 6 of 6 (04-06 complete)
 **Status:** Phase complete
-**Mood:** 🟢 Phase 3 COMPLETE
+**Mood:** 🟢 Phase 4 COMPLETE
 
-**Progress:** ███████░░░ 62% (Phase 0, 1, 2, 3, 7 complete)
+**Progress:** ████████░░ 75% (Phase 0, 1, 2, 3, 4, 7 complete)
 
 ---
 
@@ -20,40 +20,41 @@
 
 | When | What |
 |------|------|
+| 2026-02-19 | **Phase 4 COMPLETE** - All 6 plans executed, validation system implemented |
+| 2026-02-19 | **Phase 4 Plan 06** - CLI integration + ValidationOrchestrator + 55 tests |
+| 2026-02-19 | **Phase 4 Plan 05** - KnowledgeValidator (KNOW-01/02/03/04) |
+| 2026-02-19 | **Phase 4 Plan 04** - TimelineValidator (TIME-01/02/04) |
+| 2026-02-19 | **Phase 4 Plan 03** - PropsValidator (PROP-01/02/03) |
+| 2026-02-19 | **Phase 4 Plan 02** - WardrobeValidator (WARD-01/02/03) |
+| 2026-02-19 | **Phase 4 Plan 01** - Validation foundation (Issue model, BaseValidator, ReportGenerator) |
 | 2026-02-19 | **Phase 3 COMPLETE** - All 5 plans executed, round-trip editing implemented |
-| 2026-02-19 | **Phase 3 Plan 05** - CLI sync/conflicts commands + 12 round-trip integration tests |
-| 2026-02-19 | **Phase 3 Plan 04** - VaultNoteWriter protected block replacement + 46 unit tests for sync module |
-| 2026-02-19 | **Phase 3 Plan 03** - Vault reingestion pipeline (VaultReingester, ReingestResult, ParsedNote) |
-| 2026-02-19 | **Phase 3 Plan 02** - Three-tier conflict resolution (ConflictResolver, Conflict, ConflictTier, ConflictStatus) |
-| 2026-02-19 | **Phase 3 Plan 01** - Sync foundation module (change detection, protected blocks, provenance) |
 | 2026-02-19 | **Phase 2 COMPLETE** - All 3 plans executed |
-| 2026-02-19 | **Phase 2 Plan 03** - CLI integration + 17 integration tests for full pipeline |
-| 2026-02-19 | **Phase 2 Plan 02** - Dialogue formatter integration |
-| 2026-02-19 | **Phase 2 Plan 01** - ScriptBuilder core with sluglines, beats, dialogue extraction |
 | 2026-02-19 | **Phase 1 COMPLETE** - All 4 plans executed across 3 waves |
 | 2026-02-19 | **Phase 7 COMPLETE** - Media Asset Archive System |
-| 2026-02-19 | Test framework: 137 tests passing |
+| 2026-02-19 | Test framework: 258 tests passing |
 
 ---
 
 ## Active Work
 
 ### Current Task
-Phase 3 COMPLETE. Ready for Phase 4.
+Phase 4 COMPLETE. Ready for Phase 5.
 
 ### Completed Phases
 - ✅ Phase 0: Foundation
 - ✅ Phase 1: Canon Extraction
 - ✅ Phase 2: Script Composition
 - ✅ Phase 3: Round-Trip Editing
+- ✅ Phase 4: Validation
 - ✅ Phase 7: Media Asset Archive (parallel track)
 
-### Phase 3 Progress
-- ✅ Plan 01: Sync foundation module (ChangeDetector, protected blocks, ProvenanceTracker)
-- ✅ Plan 02: Conflict resolution (ConflictResolver, three-tier classification)
-- ✅ Plan 03: Vault reingestion pipeline (VaultReingester, ReingestResult)
-- ✅ Plan 04: VaultNoteWriter protected block replacement + 46 unit tests
-- ✅ Plan 05: CLI sync/conflicts commands + 12 round-trip integration tests
+### Phase 4 Progress
+- ✅ Plan 01: Validation foundation (Issue, IssueSeverity, IssueCategory, BaseValidator, ReportGenerator)
+- ✅ Plan 02: WardrobeValidator (WARD-01/02/03 rules)
+- ✅ Plan 03: PropsValidator (PROP-01/02/03 rules)
+- ✅ Plan 04: TimelineValidator (TIME-01/02/04 rules)
+- ✅ Plan 05: KnowledgeValidator (KNOW-01/02/03/04 rules)
+- ✅ Plan 06: CLI integration + ValidationOrchestrator + 55 tests
 
 ---
 
@@ -105,6 +106,17 @@ Phase 3 COMPLETE. Ready for Phase 4.
 13. CLI sync/conflicts commands use argparse subcommands (existing pattern)
 14. Integration tests verify conflict detection not just entity updates (conflicts may be AMBIGUOUS tier)
 
+### Key Decisions Made (Phase 4 - Validation)
+1. IssueSeverity maps to Phase 3 ConflictTier pattern (ERROR→CRITICAL, WARNING→AMBIGUOUS, INFO→SAFE)
+2. Four specialized validators extend BaseValidator abstract class
+3. Each validator implements rule-based checks (no ML) for deterministic results
+4. ReportGenerator creates Obsidian-compatible markdown with wikilinks
+5. Reports stored in vault/80_Reports/ for easy access
+6. Issues persisted to build/issues.json with deterministic sorting
+7. ValidationOrchestrator follows CanonBuilder pattern
+8. CLI validate command returns exit code 1 on errors (CI-friendly)
+9. Issue IDs include category prefix (issue_wardrobe_000001)
+
 ### Patterns to Remember
 - Every derived fact needs evidence link
 - Disambiguation queue prevents wrong merges
@@ -124,6 +136,7 @@ Phase 3 COMPLETE. Ready for Phase 4.
 - **Reingest pattern: detect modified files -> parse vault notes -> merge with StoryGraph -> flag conflicts -> save**
 - **Protected write pattern: Check for existing file -> ensure markers -> replace only protected content -> preserve manual edits**
 - **Round-trip CLI pattern: gsd sync -> detect changes -> flag conflicts -> gsd conflicts -> review/resolve**
+- **Validation pattern: Run all validators -> collect issues -> sort by severity -> persist JSON -> generate reports**
 
 ### Things to Avoid
 - Don't use bare names when canonical entities exist
@@ -157,8 +170,8 @@ Phase 3 COMPLETE. Ready for Phase 4.
 
 ## Next Actions
 
-1. **Phase 3 COMPLETE** - Round-trip editing fully implemented
-2. **Next:** Phase 4 (FDX Export Enhancements) or Phase 5 (PDF Generation)
+1. **Phase 4 COMPLETE** - Validation system fully implemented
+2. **Next:** Phase 5 (Shot Layer) or Phase 6 (Blender Integration)
 
 ---
 
@@ -175,10 +188,11 @@ fdx_gsd/
 │       ├── 01-canon-extraction/ ✅ (4 plans complete)
 │       ├── 02-script-composition/ ✅ (3 plans complete)
 │       ├── 03-round-trip-editing/ ✅ (5/5 plans complete)
+│       ├── 04-validation/       ✅ (6/6 plans complete)
 │       └── 07-media-archive/    ✅ (7 plans complete)
 ├── .beads/                      ✅
 ├── .github/workflows/ci.yml     ✅
-├── apps/cli/                    ✅ (build script + export fdx + sync + conflicts commands)
+├── apps/cli/                    ✅ (build script + export fdx + sync + conflicts + validate commands)
 ├── core/
 │   ├── exporters/               ✅ (FDX writer)
 │   ├── extraction/              ✅ (character, location, scene)
@@ -189,11 +203,12 @@ fdx_gsd/
 │   ├── storygraph/              ✅ (schema)
 │   ├── scriptgraph/             ✅ (schema + validation utils)
 │   ├── script/                  ✅ (ScriptBuilder, SluglineGenerator, BeatExtractor, DialogueFormatter)
-│   └── sync/                    ✅ (ChangeDetector, protected_blocks, ProvenanceTracker, ConflictResolver, VaultReingester)
+│   ├── sync/                    ✅ (ChangeDetector, protected_blocks, ProvenanceTracker, ConflictResolver, VaultReingester)
+│   └── validation/              ✅ (Issue, BaseValidator, ReportGenerator, WardrobeValidator, PropsValidator, TimelineValidator, KnowledgeValidator, ValidationOrchestrator)
 ├── templates/project_template/  ✅
 ├── tests/
-│   ├── unit/                    ✅ (120 tests)
-│   ├── integration/             ✅ (17 new tests for script pipeline)
+│   ├── unit/                    ✅ (156 tests)
+│   ├── integration/             ✅ (102 tests)
 │   └── fixtures/                ✅
 ├── docs/adr/                    ✅
 ├── scripts/                     ✅
