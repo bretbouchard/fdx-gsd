@@ -11,7 +11,7 @@
 ```
 Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4 ──► Phase 5 ──► Phase 6 ──► Phase 7
 Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender     Archive
-   ✅           ✅          ✅          ✅          ✅         📋         📋           ✅
+   ✅           ✅          ✅          ✅          ✅         ✅         📋           ✅
                                      │
                                      └──► Phase 7 (parallel track for media archive)
 ```
@@ -236,16 +236,16 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 
 ---
 
-## Phase 5: Shot Layer 📋 PLANNED
+## Phase 5: Shot Layer ✅ COMPLETE
 
 **Goal:** Shot lists exportable, blocking notes coherent
 
-**Duration:** TBD
-**Status:** 📋 Ready to execute
-**Plans:** 5 plans in 5 waves
+**Duration:** Complete (2026-02-19)
+**Status:** ✅ Complete
+**Plans:** 5 plans in 5 waves (all executed)
 **Depends On:** Phase 4
 
-### Requirements
+### Requirements Delivered
 - SCR-05: Shot Detection
 - SCR-06: Shot List Export
 
@@ -258,22 +258,22 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 - Auto-populate Shot List section in scene vault notes
 
 ### Deliverables
-- [ ] `gsd suggest-shots` command
-- [ ] ShotSuggester orchestrator (follows BaseValidator pattern)
-- [ ] ShotDetector with heuristic rules
-- [ ] ShotListExporter for CSV/JSON
-- [ ] core/shots/ module (types, models, detector, exporter, suggester)
-- [ ] exports/shotlist.csv (StudioBinder-compatible)
-- [ ] build/shotgraph.json
-- [ ] Updated SCN_Template.md with Shot List section
-- [ ] Unit and integration tests
+- [x] `gsd suggest-shots` command
+- [x] ShotSuggester orchestrator (follows BaseValidator pattern)
+- [x] ShotDetector with heuristic rules
+- [x] ShotListExporter for CSV/JSON
+- [x] core/shots/ module (types, models, detector, exporter, suggester)
+- [x] exports/shotlist.csv (StudioBinder-compatible)
+- [x] build/shotgraph.json
+- [x] Updated SCN_Template.md with Shot List section
+- [x] Unit and integration tests (76 tests)
 
 ### Plans
-- [ ] 05-01-PLAN.md — Shot types and models (Wave 1)
-- [ ] 05-02-PLAN.md — ShotDetector + ShotListExporter (Wave 2)
-- [ ] 05-03-PLAN.md — ShotSuggester orchestrator (Wave 3)
-- [ ] 05-04-PLAN.md — CLI integration + vault template (Wave 4)
-- [ ] 05-05-PLAN.md — Tests (Wave 5)
+- [x] 05-01-PLAN.md — Shot types and models (Wave 1)
+- [x] 05-02-PLAN.md — ShotDetector + ShotListExporter (Wave 2)
+- [x] 05-03-PLAN.md — ShotSuggester orchestrator (Wave 3)
+- [x] 05-04-PLAN.md — CLI integration + vault template (Wave 4)
+- [x] 05-05-PLAN.md — Tests (Wave 5)
 
 ### Shot Types
 - WS (Wide Shot), MS (Medium Shot), MCU (Medium Close-Up)
@@ -289,10 +289,10 @@ Foundation    Canon       Script     Round-Trip  Validation  Shots      Blender 
 - POV phrases -> POV (P3)
 
 ### Exit Criteria
-- [ ] Shot lists exportable to CSV
-- [ ] Shot lists exportable to JSON
-- [ ] Blocking notes in scene metadata
-- [ ] `gsd suggest-shots` generates shots from scriptgraph
+- [x] Shot lists exportable to CSV
+- [x] Shot lists exportable to JSON
+- [x] Blocking notes in scene metadata
+- [x] `gsd suggest-shots` generates shots from scriptgraph
 
 ---
 
@@ -420,6 +420,6 @@ Phase 0 ──┬──► Phase 1 ──┬──► Phase 2 ──► Phase 3 
 
 ## Current Position
 
-**Phase:** 5 (Shot Layer) - Ready for execution
-**Completed:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 7
-**Next Action:** Execute Phase 5 with `/gsd:execute-phase 5`
+**Phase:** 6 (Blender Integration) - Ready for planning
+**Completed:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 7
+**Next Action:** Plan Phase 6 with `/gsd:plan-phase 6`
