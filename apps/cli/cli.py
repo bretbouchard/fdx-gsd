@@ -581,6 +581,164 @@ def cmd_conflicts(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_suggest_shots(args: argparse.Namespace) -> int:
+    """
+    Generate shot suggestions from ScriptGraph.
+
+    Analyzes scenes for shot opportunities and exports shot list.
+
+    Usage: gsd suggest-shots
+    """
+    project_path, exit_code = find_project_root()
+    if exit_code != 0:
+        print("Error: Not in a GSD project.", file=sys.stderr)
+        return exit_code
+
+    build_path = project_path / "build"
+    scriptgraph_path = build_path / "scriptgraph.json"
+
+    if not scriptgraph_path.exists():
+        print("Error: No scriptgraph.json found. Run 'gsd build script' first.")
+        return 1
+
+    print("Suggesting shots...")
+    print()
+
+    from core.shots import ShotSuggester, ShotListExporter
+
+    # Run shot suggester
+    suggester = ShotSuggester(build_path)
+    result = suggester.suggest()
+
+    if not result.success:
+        print("Errors:")
+        for error in result.errors:
+            print(f"  - {error}")
+        return 1
+
+    # Print results
+    print("=== Shot Suggestion Results ===")
+    print(f"Scenes processed: {result.scenes_processed}")
+    print(f"Shots suggested: {result.shots_suggested}")
+    print()
+
+    # Print breakdown by type
+    summary = suggester.get_summary()
+    by_type = summary.get("by_shot_type", {})
+    if by_type:
+        print("By Shot Type:")
+        for shot_type, count in sorted(by_type.items()):
+            print(f"  {shot_type}: {count}")
+        print()
+
+    # Export files
+    shot_list = suggester.get_shot_list()
+    exporter = ShotListExporter()
+
+    # Create exports directory
+    exports_dir = project_path / "exports"
+    exports_dir.mkdir(exist_ok=True)
+
+    # Export CSV
+    csv_path = exports_dir / "shotlist.csv"
+    exporter.export_csv(shot_list, csv_path)
+    print(f"CSV: {csv_path}")
+
+    # Export JSON (shotgraph.json)
+    json_path = build_path / "shotgraph.json"
+    shot_list.save(json_path)
+    print(f"JSON: {json_path}")
+
+    print()
+    print(f"\033[92mShot list complete\033[0m")
+
+    return 0
+
+
+def cmd_validate(args: argparse.Namespace) -> int:
+    """
+    Validate story continuity.
+
+    Runs all validators and generates reports.
+
+    Usage: gsd validate
+    """
+    project_path, exit_code = find_project_root()
+    if exit_code != 0:
+        print("Error: Not in a GSD project.", file=sys.stderr)
+        return exit_code
+
+    # Check for storygraph
+    storygraph_path = project_path / "build" / "storygraph.json"
+    if not storygraph_path.exists():
+        print("Error: No storygraph.json found. Run 'gsd build canon' first.")
+        return 1
+
+    print("Running validation...")
+    print()
+
+    from core.validation import ValidationOrchestrator
+
+    orchestrator = ValidationOrchestrator(project_path)
+    result = orchestrator.run_validation()
+
+    # Check for errors
+    if result.get("error"):
+        print(f"Error: {result['error']}")
+        return 1
+
+    # Print results
+    print("=== Validation Results ===")
+    print()
+
+    by_severity = result.get("by_severity", {})
+    errors = by_severity.get("error", 0)
+    warnings = by_severity.get("warning", 0)
+    info = by_severity.get("info", 0)
+
+    if errors > 0:
+        print(f"\033[91mErrors:   {errors}\033[0m")
+    else:
+        print(f"Errors:   {errors}")
+
+    if warnings > 0:
+        print(f"\033[93mWarnings: {warnings}\033[0m")
+    else:
+        print(f"Warnings: {warnings}")
+
+    if info > 0:
+        print(f"\033[94mInfo:     {info}\033[0m")
+    else:
+        print(f"Info:     {info}")
+
+    print()
+
+    # Print by category
+    by_category = result.get("by_category", {})
+    if by_category:
+        print("By Category:")
+        for cat, count in sorted(by_category.items()):
+            print(f"  {cat}: {count}")
+        print()
+
+    # Print report locations
+    reports = result.get("reports", {})
+    if reports:
+        print("Reports generated in vault/80_Reports/:")
+        for name, path in reports.items():
+            print(f"  {name}: {path}")
+        print()
+
+    # Print success/failure
+    if result.get("success"):
+        print("\033[92mValidation complete - no errors found\033[0m")
+        return 0
+    else:
+        print(f"\033[91mValidation complete - {errors} error(s) found\033[0m")
+        print(f"\nIssues saved to: {result.get('issues_path', 'build/issues.json')}")
+        return 1
+
+
 def cmd_resolve(args: argparse.Namespace) -> int:
     """
     Interactive disambiguation resolution.
@@ -1234,6 +1392,14 @@ def main() -> int:
     p_conflicts.add_argument("--value", help="Value to use for resolution")
     p_conflicts.add_argument("--clear-resolved", action="store_true", help="Remove resolved conflicts from display")
     p_conflicts.set_defaults(func=cmd_conflicts)
+
+    # validate
+    p_validate = subparsers.add_parser("validate", help="Validate story continuity")
+    p_validate.set_defaults(func=cmd_validate)
+
+    # suggest-shots
+    p_shots = subparsers.add_parser("suggest-shots", help="Generate shot suggestions")
+    p_shots.set_defaults(func=cmd_suggest_shots)
 
     # archive
     p_archive = subparsers.add_parser("archive", help="Media archive commands")

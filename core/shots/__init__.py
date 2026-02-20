@@ -11,6 +11,7 @@ Main Components:
 Data Models:
     - Shot: Individual shot suggestion with evidence linking
     - ShotList: Container for all shots with serialization methods
+    - ShotSuggestionResult: Result of shot suggestion operation
 
 Enums:
     - ShotType: WS, MS, MCU, CU, ECU, INSERT, OTS, POV, TWO
@@ -25,12 +26,18 @@ Usage:
 
     if result.success:
         shot_list = suggester.get_shot_list()
-        exporter = ShotListExporter(shot_list)
-        exporter.export_csv(Path("exports/shotlist.csv"))
+        exporter = ShotListExporter()
+        exporter.export_csv(shot_list, Path("exports/shotlist.csv"))
+
+CLI Usage:
+    gsd suggest-shots  # Generates exports/shotlist.csv and build/shotgraph.json
 """
 
 from .types import CameraAngle, CameraMovement, ShotType
 from .models import Shot, ShotList
+from .detector import ShotDetector
+from .exporter import ShotListExporter
+from .suggester import ShotSuggester, ShotSuggestionResult, suggest_shots
 
 __all__ = [
     # Types
@@ -40,4 +47,11 @@ __all__ = [
     # Models
     "Shot",
     "ShotList",
+    # Components
+    "ShotDetector",
+    "ShotListExporter",
+    "ShotSuggester",
+    "ShotSuggestionResult",
+    # Convenience functions
+    "suggest_shots",
 ]
