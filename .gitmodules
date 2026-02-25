@@ -1,0 +1,9 @@
+[submodule "projects/msg-1998"]
+	path = projects/msg-1998
+	url = https://github.com/bretbouchard/msg-1998.git
+[submodule "projects/sand"]
+	path = projects/sand
+	url = https://github.com/bretbouchard/sand.git
+[submodule "projects/test_disambig"]
+	path = projects/test_disambig
+	url = https://github.com/bretbouchard/test-disambig.git

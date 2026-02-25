@@ -49,9 +49,8 @@ dmypy.json
 # Ruff
 .ruff_cache/
 
-# Project-specific
-projects/*/
-!projects/.gitkeep
+# Project-specific (now using submodules)
+# Submodules are tracked in .gitmodules
 
 # Beads database (if sensitive)
 # .beads/
